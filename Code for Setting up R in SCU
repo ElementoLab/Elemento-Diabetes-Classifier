@@ -1,0 +1,21 @@
+To load R:
+spack load -r /mirrusu
+
+To make a subset of one of the HTML files in phenotypes:
+zcat /athena/elementolab/scratch/nib4003/ukbiobank/phenotypes/ukb26867.csv.gz | head -100 > subset_ukb
+
+To open R (extremely simple and not a mistake):
+R
+
+To create dataframe once in R for subset_ukb called uk:
+uk <- read.csv("subset_ukb", stringsAsFactors=F, header=T)
+uk
+
+To show first 10 columns for first 10 people:
+uk[1:10,1:10]
+
+To show dimension of a dataframe:
+dim(uk)
+
+To quit R:
+Press Ctrl Z
