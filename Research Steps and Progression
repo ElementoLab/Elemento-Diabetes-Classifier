@@ -1,1 +1,184 @@
+Initial thoughts:
 
+* IT MAY BE BEST TO DOWNLOAD THE COLUMNS ONTO MY COMPUTER THAT ARE USED TO DEFINE WHO HAS PREDIABETES AND WHO PROGRESSES TO DIABETES. 
+IT SHOULD ONLY BE A FEW COLUMNS SO IT WILL NOT TAKE UP A LOT OF ROOM ON MY COMPUTER AND IT SHOULD BE QUICK COMPUTATIONALLY. 
+THEN I CAN LOOK AT THE DATA ON A JUPYTER NOTEBOOK AND IT WILL BE MUCH EASIER TO DO WHAT I WANT.
+
+# Procedure and Thinking Throughout the Project
+
+To begin, it would be most efficient to focus on finding the certain patients that will be involved in this study so that 
+we do not have to waste time waiting for computations on many pateints to run initially. 
+We need to keep only the patients with prediabetic symptoms to start off. We do this by 
+AND THOSE THAT CAME BACK FOR A CHECK UP BECAUSE WE NEED TO CLASSIFY THESE PATIENTS BASED ON IF THEY DEVELOPED DIABETES OR NOT OVER TIME! 
+If there were multiple times when patients were checked up on, we will need to figure out the first date when a patient's blood glucose and HbA1c were taken. 
+Then we can keep only the patients who have results in a prediabetic range. 
+Then we look at the next time a patient is checked up on and see if they have diabetes at that point or not. This will give us our targets. 
+We have to take into consideration if a patient was checked up on more than once. 
+Even if diabetes was not diagnosed the first check up, but it is for the second check up, this patient will be targeted as having developed diabetes.
+
+Another thing we need to consider is gestational diabetes. 
+We will not include this in our analysis because the cause of development of diabetes is due to pregnancy mostly and not other factors we are looking for.
+
+Columns Needed - UDI:
+
+In HTML: ukb42385.csv.gz
+
+Glucose - 30740-0.0
+Glucose - 30740-1.0
+Glucose assay date - 30741-0.0
+Glucose assay date - 30741.1.0
+Glycated haemoglobin (HbA1c) - 30750-0.0
+Glycated haemoglobin (HbA1c) - 30750-1.0
+Glycated haemoglobin (HbA1c) assay date - 30751.0.0
+Glycated haemoglobin (HbA1c) assay date - 30751.1.0
+
+In HTML: ukb26867.csv.gz
+
+Diabetes diagnosed by doctor - 2443-0.0
+Diabetes diagnosed by doctor - 2443-1.0
+Diabetes diagnosed by doctor - 2443-2.0
+Age diabetes diagnosed - 2976-0.0
+Age diabetes diagnosed - 2976-1.0
+Age diabetes diagnosed - 2976-2.0
+Gestational diabetes only - 4041-0.0
+Gestational diabetes only - 4041-1.0
+Gestational diabetes only - 4041-2.0
+
+In HTML: ukb33822.csv.gz
+
+Non-cancer illness code, self-reported - Use all 20002-0.0 to 20002-2.33 (99 columns in total)
+
+The next step after defining patients with prediabetic symptoms is to figure out which of them are diagnosed with diabetes and when. 
+If we diagnose a patient with prediabetes, but they are already diagnosed with diabetes, then we must throw them away. 
+If the patient is not diagnosed with diabetes, then we have to look at the later dates 
+and see if diabetes was diagnosed after the initial prediabetes classification using the blood glucose and HbA1c. 
+We then mark these patients as progressing to diabetes, and all other patients will be marked as not progressing to diabetes.
+
+We then need to include all the columns using the HTML files in the phenotypes folder 
+and merge all the columns together by eid for the patients with prediabetic symptoms which we have decided to keep in the analysis. 
+AT THIS POINT, DEPENDING ON HOW MANY PATIENTS WE HAVE LEFT, IT MAY BE POSSIBLE TO SCP THE DATAFRAME WE CREATE TO THE COMPUTER AGAIN. 
+THIS WOULD ALLOW US TO DO THE DATA MANIPULATION ON A BETTER VISUALIZED PLACE AND MAKE COMMENTS EASILY AS WE GO ALONG THE PRE-PROCESSING AND MACHINE LEARNING STEPS. 
+THERE SHOULD BE A LOT OF FEATURES TO BEGIN WITH, SO IT MAY NOT BE POSSIBLE TO DO THIS, 
+BUT FOR THE MODEL WE CREATE USING ONLY FEATURES WE KNOW ARE IMPORTANT TO DIABETES DIAGNOSIS IT SHOULD BE POSSIBLE.
+
+To get python installed:
+
+Load python 3.7.0:
+spack load -r python@3.7.0^gcc@6.3.0
+
+Shows that python is loaded:
+echo $LOADEDMODULES | sed "s/:/\n/g" | sort
+
+Load pandas for use in python:
+spack load -r py-pandas
+
+Do not need to run but shows that pandas is downloaded now:
+ echo $LOADEDMODULES | sed "s/:/\n/g" | sort
+
+To open python (like R very simple):
+python
+
+Now we can import pandas as usual:
+import pandas as pd
+
+IMPORTANT: BEFORE MANIPULATION OF THE DATA, WE FIRST HAVE TO OPEN THE .gz FILES USING LINUX COMMAND zcat FOR ALL FILES USED ALONG WITH USING THE > COMMAND TO MAKE THIS INTO A SUBSET. 
+AN EXAMPLE CODE FOR ukb26867 IS SHOWN BELOW:
+zcat /athena/elementolab/scratch/nib4003/ukbiobank/phenotypes/ukb26867.csv.gz > subset_ukb
+* This does take a little bit of time since the files are so big, but then we can use them in python
+****** VERY IMPORTANT: We noticed differences in the counts across HTML files which contain the information regarding the same data 
+(e.g. 20002-X.X occurs in whole_file_26867 and whole_file_33822). 
+Scott said that this was most likely due to patients withdrawing their information from the UKBiobank over time, and therefore, 
+as ethicial researchers we must use the columns with less patients in our analyses. 
+Therefore, we have to be careful to take only the patients who want to be included in the study 
+and we must make sure to use the duplicate column with the least number of patients in it.
+
+1/21/2021:
+The next step is to read in the columns we want for our dataframe to be able to diagnose prediabetes. 
+We have to do this separately for the HTML files we need to use do diagnose prediabetes. 
+The third step here contains all the columns that correspond to a self-diagnosis of diabetes 
+which we will add to the doctor diagnosis of diabetes due to Scott's figure saying self and doctor diagnosis are not statistically different for diabetes.
+first_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_26867', usecols = ['eid', '2443-0.0', '2443-1.0', '2443-2.0', '2976-0.0', '2976-1.0', '2976-2.0', '4041-0.0', '4041-1.0', '4041-2.0', '53-0.0', '53-1.0', '53-2.0'])
+
+second_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_42385', usecols = ['eid', '30740-0.0', '30740-1.0', '30741-0.0', '30741-1.0', '30750-0.0', '30750-1.0', '30751-0.0', '30751-1.0'])
+
+third_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_33822', usecols = ['eid', '20002-0.0','20002-0.1', '20002-0.2', '20002-0.3', '20002-0.4', '20002-0.5', '20002-0.6', '20002-0.7', '20002-0.8', '20002-0.9', '20002-0.10', '20002-0.11', '20002-0.12', '20002-0.13', '20002-0.14', '20002-0.15', '20002-0.16', '20002-0.17', '20002-0.18', '20002-0.19', '20002-0.20', '20002-0.21', '20002-0.22', '20002-0.23', '20002-0.24', '20002-0.25', '20002-0.26', '20002-0.27', '20002-0.28', '20002-0.29', '20002-0.30', '20002-0.31', '20002-0.32', '20002-0.33', '20002-1.0', '20002-1.1', '20002-1.2', '20002-1.3', '20002-1.4', '20002-1.5', '20002-1.6', '20002-1.7', '20002-1.8', '20002-1.9', '20002-1.10','20002-1.11', '20002-1.12', '20002-1.13', '20002-1.14', '20002-1.15', '20002-1.16', '20002-1.17', '20002-1.18', '20002-1.19', '20002-1.20', '20002-1.21', '20002-1.22', '20002-1.23', '20002-1.24', '20002-1.25', '20002-1.26', '20002-1.27', '20002-1.28', '20002-1.29', '20002-1.30', '20002-1.31', '20002-1.32', '20002-1.33', '20002-2.0', '20002-2.1', '20002-2.2', '20002-2.3', '20002-2.4', '20002-2.5', '20002-2.6', '20002-2.7', '20002-2.8', '20002-2.9', '20002-2.10','20002-2.11', '20002-2.12', '20002-2.13', '20002-2.14', '20002-2.15', '20002-2.16', '20002-2.17', '20002-2.18', '20002-2.19', '20002-2.20', '20002-2.21', '20002-2.22', '20002-2.23', '20002-2.24', '20002-2.25', '20002-2.26', '20002-2.27', '20002-2.28', '20002-2.29', '20002-2.30', '20002-2.31', '20002-2.32', '20002-2.33' ])
+
+Now we can merge these dataframes by eid (patient number).
+merged_prediabetes_information = first_step.merge(second_step, on = 'eid').merge(third_step, on = 'eid')
+
+Finally we can write this dataframe to a csv so that we can import it to our desktop using winscp.
+merged_prediabetes_information.to_csv(path_or_buf = '~nib4003/for_winscp/merged_prediabetes_information')
+
+Another thing we must look into is a different way of finding patients who develop diabetes after their prediabetic classification. 
+This involves using the hesin files located in /athena/elementolab/scratch/nib4003/ukbiobank/hesin which includes two files we will use named 'hesin.txt' and 'hesin_diag.txt'. 
+'hesin.txt' contains the dates when a patient is diagnosed with a disease, in our case of course diabetes. 
+'hesin_diag.txt' contains the actual diagnosis of diabetes for patients using the code E11, which includes all values from E110-E119. 
+E11 is defined as the diagnosis for non-insulin dependent diabetes which is type 2 diabetes. This can be found in data-coding 19 in UDI 41202-0.0. 
+We can combine these files together to create one dataframe that holds all diagnoses of diabetes and the dates in which these diagnoses were made. 
+We then compare the dates to those of the ones of UDI 53-0.0 which is the 
+'Date of attneding assessment centre' column which contains the dates we use to diagnose prediabetic patients. 
+If the date using the hesin text files is later than that of the csv file for a prediabetic patient, then this patient developed diabetes. 
+If the diabetes diagnosis is before the date of the csv file for a prediabetic patient, 
+then the patient is already classified as diabetic and must be removed from the dataframe. 
+The code to create the dataframe with all dates from the hesin files is shown below.
+To import 'hesin_diag.txt':
+hesin_diag = pd.read_csv('/athena/elementolab/scratch/nib4003/ukbiobank/hesin/hesin_diag.txt', sep = '\t')
+
+To find all diabetes diagnosed patients:
+type2_diabetes_only = hesin_diag[hesin_diag['diag_icd10'].str.contains('E11',na = False)]
+
+To import 'hesin.txt'"
+hesin_txt = pd.read_csv('/athena/elementolab/scratch/nib4003/ukbiobank/hesin/hesin.txt', sep = '\t')
+
+Next we cut down the number of columns in order to have a merge of only the columns we need from 'hesin.txt'"
+hesin_txt_for_merge = hesin_txt[['eid', 'ins_index', 'epistart']]
+
+We merge the dataframes together by eid and ins_index to get the final result with the dates of diagnosis:
+patients_with_type2_diabetes_with_dates = type2_diabetes_only.merge(hesin_txt_for_merge, on = ['eid', 'ins_index'])
+
+Finally we have to save this dataframe as a csv to be exported to my computer so that we can use it to compare the dates in this file to the dates of the other file 
+in order to see if more patients in a prediabetic state progressed to a diabetic state:
+patients_with_type2_diabetes_with_dates.to_csv(path_or_buf = '~nib4003/for_winscp/patients_with_type2_diabetes_with_
+dates')
+
+The next step is to make a classifier that contains many columns that we want to cut down using feature selection. 
+We first start by using Linux commands to create our 4 whole_file_42385 (one example of the 4) files that contain all the HTML features. 
+We next need to combine all the features with the dataframe we created of all classified prediabetic patients so that the computation does not take a long time. 
+First, we import our prediabetic patient dataframe.
+all_prediabetes = pd.read_csv('for_winscp/prediabetic_all_possible_to_classify_final')
+
+An additional column comes along with the above dataframe that we need to drop, shown below.
+all_prediabetes = all_prediabetes.drop(columns = ['Unnamed: 0'])
+
+Next we need to import the four large files with all the features. An example is shown below but we need to do this for all the files. 
+This does take a long time for every file since they are so large.
+first_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_26867')
+
+Next we want to keep only the columns with a small percentage of NaN values in the columns. 
+Therefore, we drop all columns with greater than 50% of values in the column being NaN.
+less_features_first_step = first_step[first_step.columns[first_step.isnull().mean() < 0]]
+
+We can look at the new number of features using the command below.
+less_features_first_step.shape
+
+The complete list of commands for all four files is shown below (includes the previous 3):
+first_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_26867')
+less_features_first_step = first_step[first_step.columns[first_step.isnull().mean() < 0]]
+less_features_first_step.shape
+second_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_33822')
+less_features_second_step = second_step[second_step.columns[second_step.isnull().mean() < 0.5]]
+less_features_second_step.shape
+third_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_41972')
+less_features_third_step = third_step[third_step.columns[third_step.isnull().mean() < 0.5]]
+less_features_third_step.shape
+fourth_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_42385')
+less_features_fourth_step = fourth_step[fourth_step.columns[fourth_step.isnull().mean() < 0.5]]
+less_features_fourth_step.shape
+
+We do this for all 4 large files and then merge the remaining 4 dataframes with many features to that of the prediabetic patient dataframe we defined on the desktop. 
+The merge command is shown below.
+all_features_prediabetics_only = all_prediabetes.merge(less_features_first_step, on = 'eid').merge(less_features_second_step, on = 'eid').merge(less_features_fourth_step, on = 'eid')
+
+Now we finally have the whole dataframe with all the features for the prediabetic patients. 
+The next step is to save the dataframe as a csv, as we have done before, in order to send it back to the desktop using WinSCP.
+all_features_prediabetics_only.to_csv(path_or_buf = '~nib4003/for_winscp/all_features_prediabetics_only')
