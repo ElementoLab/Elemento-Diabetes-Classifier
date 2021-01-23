@@ -6,62 +6,24 @@ THEN I CAN LOOK AT THE DATA ON A JUPYTER NOTEBOOK AND IT WILL BE MUCH EASIER TO 
 
 # Procedure and Thinking Throughout the Project
 
-To begin, it would be most efficient to focus on finding the certain patients that will be involved in this study so that 
-we do not have to waste time waiting for computations on many pateints to run initially. 
-We need to keep only the patients with prediabetic symptoms to start off. We do this by 
-AND THOSE THAT CAME BACK FOR A CHECK UP BECAUSE WE NEED TO CLASSIFY THESE PATIENTS BASED ON IF THEY DEVELOPED DIABETES OR NOT OVER TIME! 
-If there were multiple times when patients were checked up on, we will need to figure out the first date when a patient's blood glucose and HbA1c were taken. 
-Then we can keep only the patients who have results in a prediabetic range. 
-Then we look at the next time a patient is checked up on and see if they have diabetes at that point or not. This will give us our targets. 
-We have to take into consideration if a patient was checked up on more than once. 
-Even if diabetes was not diagnosed the first check up, but it is for the second check up, this patient will be targeted as having developed diabetes.
+1. Unzipping UKBiobank files for use in python or other language for data manipulation
 
-Another thing we need to consider is gestational diabetes. 
-We will not include this in our analysis because the cause of development of diabetes is due to pregnancy mostly and not other factors we are looking for.
+BEFORE MANIPULATION OF THE DATA, WE FIRST HAVE TO OPEN THE .gz FILES USING LINUX COMMAND zcat FOR ALL FILES USED ALONG WITH USING THE > COMMAND TO MAKE THIS INTO A USABLE FILE. 
+AN EXAMPLE CODE FOR ukb26867 IS SHOWN BELOW (for my path to the ukb26867 file in the SCU):
+zcat /athena/elementolab/scratch/nib4003/ukbiobank/phenotypes/ukb26867.csv.gz > whole_file_26867
 
-Columns Needed - UDI:
+* This does take a little bit of time since the files are so big, but then we can use them in python
+****** VERY IMPORTANT: We noticed differences in the counts across HTML files which contain the information regarding the same data 
+(e.g. 20002-X.X occurs in whole_file_26867 and whole_file_33822). 
+Scott said that this was most likely due to patients withdrawing their information from the UKBiobank over time, and therefore, 
+as ethicial researchers we must use the columns with less patients in our analyses. 
+Therefore, we have to be careful to take only the patients who want to be included in the study 
+and we must make sure to use any duplicate column with the least number of patients in it.
 
-In HTML: ukb42385.csv.gz
 
-Glucose - 30740-0.0
-Glucose - 30740-1.0
-Glucose assay date - 30741-0.0
-Glucose assay date - 30741.1.0
-Glycated haemoglobin (HbA1c) - 30750-0.0
-Glycated haemoglobin (HbA1c) - 30750-1.0
-Glycated haemoglobin (HbA1c) assay date - 30751.0.0
-Glycated haemoglobin (HbA1c) assay date - 30751.1.0
+2. Setting up Python on the Scientific Computing Unit (SCU)
 
-In HTML: ukb26867.csv.gz
-
-Diabetes diagnosed by doctor - 2443-0.0
-Diabetes diagnosed by doctor - 2443-1.0
-Diabetes diagnosed by doctor - 2443-2.0
-Age diabetes diagnosed - 2976-0.0
-Age diabetes diagnosed - 2976-1.0
-Age diabetes diagnosed - 2976-2.0
-Gestational diabetes only - 4041-0.0
-Gestational diabetes only - 4041-1.0
-Gestational diabetes only - 4041-2.0
-
-In HTML: ukb33822.csv.gz
-
-Non-cancer illness code, self-reported - Use all 20002-0.0 to 20002-2.33 (99 columns in total)
-
-The next step after defining patients with prediabetic symptoms is to figure out which of them are diagnosed with diabetes and when. 
-If we diagnose a patient with prediabetes, but they are already diagnosed with diabetes, then we must throw them away. 
-If the patient is not diagnosed with diabetes, then we have to look at the later dates 
-and see if diabetes was diagnosed after the initial prediabetes classification using the blood glucose and HbA1c. 
-We then mark these patients as progressing to diabetes, and all other patients will be marked as not progressing to diabetes.
-
-We then need to include all the columns using the HTML files in the phenotypes folder 
-and merge all the columns together by eid for the patients with prediabetic symptoms which we have decided to keep in the analysis. 
-AT THIS POINT, DEPENDING ON HOW MANY PATIENTS WE HAVE LEFT, IT MAY BE POSSIBLE TO SCP THE DATAFRAME WE CREATE TO THE COMPUTER AGAIN. 
-THIS WOULD ALLOW US TO DO THE DATA MANIPULATION ON A BETTER VISUALIZED PLACE AND MAKE COMMENTS EASILY AS WE GO ALONG THE PRE-PROCESSING AND MACHINE LEARNING STEPS. 
-THERE SHOULD BE A LOT OF FEATURES TO BEGIN WITH, SO IT MAY NOT BE POSSIBLE TO DO THIS, 
-BUT FOR THE MODEL WE CREATE USING ONLY FEATURES WE KNOW ARE IMPORTANT TO DIABETES DIAGNOSIS IT SHOULD BE POSSIBLE.
-
-To get python installed:
+Below we show how to use Spack to load Python. Before this is possible, follow this documentation page to set up all necessities for spack: https://wcmscu.atlassian.net/wiki/spaces/WIKI/pages/33594/Spack
 
 Load python 3.7.0:
 spack load -r python@3.7.0^gcc@6.3.0
@@ -72,35 +34,31 @@ echo $LOADEDMODULES | sed "s/:/\n/g" | sort
 Load pandas for use in python:
 spack load -r py-pandas
 
-Do not need to run but shows that pandas is downloaded now:
- echo $LOADEDMODULES | sed "s/:/\n/g" | sort
+Do not need to run this line of code but it shows that pandas is downloaded now:
+echo $LOADEDMODULES | sed "s/:/\n/g" | sort
 
-To open python (like R very simple):
+To open python (very simple):
 python
 
-Now we can import pandas as usual:
+Now we can import pandas as usual in the newly opened python file:
 import pandas as pd
 
-IMPORTANT: BEFORE MANIPULATION OF THE DATA, WE FIRST HAVE TO OPEN THE .gz FILES USING LINUX COMMAND zcat FOR ALL FILES USED ALONG WITH USING THE > COMMAND TO MAKE THIS INTO A SUBSET. 
-AN EXAMPLE CODE FOR ukb26867 IS SHOWN BELOW:
-zcat /athena/elementolab/scratch/nib4003/ukbiobank/phenotypes/ukb26867.csv.gz > subset_ukb
-* This does take a little bit of time since the files are so big, but then we can use them in python
-****** VERY IMPORTANT: We noticed differences in the counts across HTML files which contain the information regarding the same data 
-(e.g. 20002-X.X occurs in whole_file_26867 and whole_file_33822). 
-Scott said that this was most likely due to patients withdrawing their information from the UKBiobank over time, and therefore, 
-as ethicial researchers we must use the columns with less patients in our analyses. 
-Therefore, we have to be careful to take only the patients who want to be included in the study 
-and we must make sure to use the duplicate column with the least number of patients in it.
 
-1/21/2021:
+3. Use Scientific Computing Unit to create dataframe for exportation to personal computer in order to classify prediabetic patients
+
 The next step is to read in the columns we want for our dataframe to be able to diagnose prediabetes. 
-We have to do this separately for the HTML files we need to use do diagnose prediabetes. 
-The third step here contains all the columns that correspond to a self-diagnosis of diabetes 
+We have to do this separately for the HTML files we need to use to diagnose prediabetes. 
 which we will add to the doctor diagnosis of diabetes due to Scott's figure saying self and doctor diagnosis are not statistically different for diabetes.
+The first step here contains all the information for doctor diagnosis, age of diagnosis, gestational diabetics, and dates the blood was drawn.
 first_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_26867', usecols = ['eid', '2443-0.0', '2443-1.0', '2443-2.0', '2976-0.0', '2976-1.0', '2976-2.0', '4041-0.0', '4041-1.0', '4041-2.0', '53-0.0', '53-1.0', '53-2.0'])
 
+The second step here contains all the columns that contain the tests used to diagnose a prediabetic patient - HbA1c and Blood Glucose.
+HbA1c is a standard measure for the classification of prediabetic patients, with patients scoring 42 mmol/mol - 47 mmol/mol in the prediabetic range.
+Blood Glucose can also be used to classify prediabetic patients. Here we assume that the blood glucose levels are after fasting and therefore the range for prediabetic patients
+for fasting blood glucose level is 5.6 mmol/L - 7.0 mmol/L. 
 second_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_42385', usecols = ['eid', '30740-0.0', '30740-1.0', '30741-0.0', '30741-1.0', '30750-0.0', '30750-1.0', '30751-0.0', '30751-1.0'])
 
+The third step here contains all the columns that correspond to a self-diagnosis of diabetes. 
 third_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_33822', usecols = ['eid', '20002-0.0','20002-0.1', '20002-0.2', '20002-0.3', '20002-0.4', '20002-0.5', '20002-0.6', '20002-0.7', '20002-0.8', '20002-0.9', '20002-0.10', '20002-0.11', '20002-0.12', '20002-0.13', '20002-0.14', '20002-0.15', '20002-0.16', '20002-0.17', '20002-0.18', '20002-0.19', '20002-0.20', '20002-0.21', '20002-0.22', '20002-0.23', '20002-0.24', '20002-0.25', '20002-0.26', '20002-0.27', '20002-0.28', '20002-0.29', '20002-0.30', '20002-0.31', '20002-0.32', '20002-0.33', '20002-1.0', '20002-1.1', '20002-1.2', '20002-1.3', '20002-1.4', '20002-1.5', '20002-1.6', '20002-1.7', '20002-1.8', '20002-1.9', '20002-1.10','20002-1.11', '20002-1.12', '20002-1.13', '20002-1.14', '20002-1.15', '20002-1.16', '20002-1.17', '20002-1.18', '20002-1.19', '20002-1.20', '20002-1.21', '20002-1.22', '20002-1.23', '20002-1.24', '20002-1.25', '20002-1.26', '20002-1.27', '20002-1.28', '20002-1.29', '20002-1.30', '20002-1.31', '20002-1.32', '20002-1.33', '20002-2.0', '20002-2.1', '20002-2.2', '20002-2.3', '20002-2.4', '20002-2.5', '20002-2.6', '20002-2.7', '20002-2.8', '20002-2.9', '20002-2.10','20002-2.11', '20002-2.12', '20002-2.13', '20002-2.14', '20002-2.15', '20002-2.16', '20002-2.17', '20002-2.18', '20002-2.19', '20002-2.20', '20002-2.21', '20002-2.22', '20002-2.23', '20002-2.24', '20002-2.25', '20002-2.26', '20002-2.27', '20002-2.28', '20002-2.29', '20002-2.30', '20002-2.31', '20002-2.32', '20002-2.33' ])
 
 Now we can merge these dataframes by eid (patient number).
@@ -116,7 +74,7 @@ This involves using the hesin files located in /athena/elementolab/scratch/nib40
 E11 is defined as the diagnosis for non-insulin dependent diabetes which is type 2 diabetes. This can be found in data-coding 19 in UDI 41202-0.0. 
 We can combine these files together to create one dataframe that holds all diagnoses of diabetes and the dates in which these diagnoses were made. 
 We then compare the dates to those of the ones of UDI 53-0.0 which is the 
-'Date of attneding assessment centre' column which contains the dates we use to diagnose prediabetic patients. 
+'Date of attneding assessment centre' column which contains the dates we use to diagnose prediabetic patients since this is when their samples were taken. 
 If the date using the hesin text files is later than that of the csv file for a prediabetic patient, then this patient developed diabetes. 
 If the diabetes diagnosis is before the date of the csv file for a prediabetic patient, 
 then the patient is already classified as diabetic and must be removed from the dataframe. 
@@ -141,8 +99,86 @@ in order to see if more patients in a prediabetic state progressed to a diabetic
 patients_with_type2_diabetes_with_dates.to_csv(path_or_buf = '~nib4003/for_winscp/patients_with_type2_diabetes_with_
 dates')
 
+* Notice how I have saved everything to a specific folder. I use this folder as a storage space to keep all files I move back and forth from my computer to the SCU
+using WinSCP. If operating on a Windows computer, YOU SHOULD DOWNLOAD WinSCP found here: https://winscp.net/eng/download.php 
+This tool makes transferring files from Windows to the SCU possible and very easy (drag and drop). 
+Once the two csv files we created in step 3 are moved to the computer, upload them to Jupyter Notebook (what I did).
+We then start the prediabetes classification and labeling of prediabetic patients who progressed to a diabetic state vs. those that never progressed to a diabetic state.
+
+Below are the columns we kept in step 3 csv files:
+
+In HTML: ukb42385.csv.gz
+
+Glucose - 30740-0.0
+Glucose - 30740-1.0
+Glucose assay date - 30741-0.0
+Glucose assay date - 30741.1.0
+Glycated haemoglobin (HbA1c) - 30750-0.0
+Glycated haemoglobin (HbA1c) - 30750-1.0
+Glycated haemoglobin (HbA1c) assay date - 30751.0.0
+Glycated haemoglobin (HbA1c) assay date - 30751.1.0
+Date of attending assessment centre - 53-0.0
+Date of attending assessment centre - 53-1.0
+Date of attending assessment centre - 53-2.0
+
+In HTML: ukb26867.csv.gz
+
+Diabetes diagnosed by doctor - 2443-0.0
+Diabetes diagnosed by doctor - 2443-1.0
+Diabetes diagnosed by doctor - 2443-2.0
+Age diabetes diagnosed - 2976-0.0
+Age diabetes diagnosed - 2976-1.0
+Age diabetes diagnosed - 2976-2.0
+Gestational diabetes only - 4041-0.0
+Gestational diabetes only - 4041-1.0
+Gestational diabetes only - 4041-2.0
+
+In HTML: ukb33822.csv.gz
+
+Non-cancer illness code, self-reported - Use all 20002-0.0 to 20002-2.33 (99 columns in total)
+
+
+4. Prediabetic Classification and Progression to Diabetes Labeling - Look at Jupyter Notebook file "Prediabetes Classification.ipynb"
+
+To begin, it would be most efficient to focus on finding the certain patients that will be involved in this study so that 
+we do not have to waste time waiting for computations on many pateints to run initially. 
+We do this by keeping only patients with an HbA1c measurement in the range 42 mmol/mol - 47 mmol/mol and a blood glucose measurement in the range 5.6 mmol/L - 7.0 mmol/L
+We cut out all doctor diagnosed diabetic patients who fall into our prediabetic ranges for the HbA1c and blood glucose measurements 
+and also patients who have gestational diabetes only because these patients do not develop diabetes in the way we desire and may bias our model.
+
+For our analysis, we assume that self-diagnosis of diabetes is equivalent to true diagnosis of diabetes.
+Therefore, we need to take into account patients which we classify as prediabetic, but who self-diagnose themselves as diabetic at the start of the study.
+These patients must be cut from the dataframe because we assume that they begin the study with diabetes, not prediabetes.
+We also need to consider prediabetic patients who are never diagnosed with diabetes (through the doctor diagnosis columns 2443-X.X or through the ICD values),
+but do self-diagnose themselves with diabetes. We need to keep these patients in the dataframe and classify them as prediabetes who progress to diabetes.
+
+We use two sequential ideas to create the group of patients who will be kept for our classifier for non-self-diagnosis patients and how to label them:
+
+The first is to use the ICD column in which prediabetic patients are diagnosed with diabetes after their initial prediabetic classification. 
+This is done by comparing the "Date of attending assessment centre" (53-0.0) column from the ukb42385 csv file with the "epistart" column from the "hesin.txt" file.
+Prediabetic classified patients with a "Date of attending assessment centre" before the "epistart" date are labeled as developing diabetes.
+Prediabetic classified patients with an "epistart" date before the "Date of attending assessment centre" have diabetes before the actual prediabetic classification,
+and must be cut from the patients we classified as prediabetic because they are truly classified as diabetics. 
+Once we have found all patients who are shown to develop diabetes from the ICD codes 
+(E110-E119 for Type 2 Diabetes shown here for Non-insulin-dependent diabetes mellitus - https://biobank.ndph.ox.ac.uk/showcase/coding.cgi?id=19&nl=1),
+we cut them from the total dataframe of prediabetic patients since we already know they are to be labeled as progressing to diabetes.
+
+The second idea is to then filter through the remaining prediabetic patients 
+and keep only the patients who we know either developed diabetes or did not develop diabetes at a later date.
+To do this, we only keep prediabetic patients in our study that contain values in columns in which a doctor diagnosis whether a patient has diabetes or not 
+at a later date when a patient returns and is re-evaluated (2443-1.0 and 2443-2.0). We must cut all the prediabetic classified patients from the final dataframe 
+who do not have a confirmational value of whether or not they developed diabetes. We can then label the patients as developing diabetes 
+if they begin classified as prediabetic (2443-0.0) but later are diagnosed with diabetes (2443-1.0 or 2443-2.0).
+
+These two ideas allow us to label all our targets as progressing to diabetes or not. We then take a list of all eid numbers for prediabetic patients progressing 
+to a diabetic state and label them. We also do the same for the remaining prediabetic patients who did not progress to a diabetic state.
+We can then save our final dataframe to a csv and export it to the SCU using WinSCP where we begin the next step.
+
+
+5. Using the SCU to create a dataframe for all the remaining patients that contains all the features from the UKBiobank to be used for feature selection
+
 The next step is to make a classifier that contains many columns that we want to cut down using feature selection. 
-We first start by using Linux commands to create our 4 whole_file_42385 (one example of the 4) files that contain all the HTML features. 
+We first start by using Linux commands to create our 4 files that contain all the HTML features (whole_file26867, whole_file_33822, whole_file_41972, whole_file_42385). 
 We next need to combine all the features with the dataframe we created of all classified prediabetic patients so that the computation does not take a long time. 
 First, we import our prediabetic patient dataframe.
 all_prediabetes = pd.read_csv('for_winscp/prediabetic_all_possible_to_classify_final')
