@@ -186,6 +186,9 @@ all_prediabetes = pd.read_csv('for_winscp/prediabetic_all_possible_to_classify_f
 An additional column comes along with the above dataframe that we need to drop, shown below.
 all_prediabetes = all_prediabetes.drop(columns = ['Unnamed: 0'])
 
+Next we make a list of the eid values of the prediabetic patients at the start of the study.
+dfToList_all_prediabetes = all_prediabetes['eid'].tolist()
+
 Next we need to import the four large files with all the features. An example is shown below but we need to do this for all the files. 
 This does take a long time for every file since they are so large.
 first_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_26867')
@@ -211,9 +214,13 @@ fourth_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_fil
 less_features_fourth_step = fourth_step[fourth_step.columns[fourth_step.isnull().mean() < 0.5]]
 less_features_fourth_step.shape
 
-We do this for all 4 large files and then merge the remaining 4 dataframes with many features to that of the prediabetic patient dataframe we defined on the desktop. 
-The merge command is shown below.
-all_features_prediabetics_only = all_prediabetes.merge(less_features_first_step, on = 'eid').merge(less_features_second_step, on = 'eid').merge(less_features_fourth_step, on = 'eid')
+We then keep only the patients from the first_step dataframe that match our eid numbers for the prediabetic patients.
+first_step_only_prediabetics_at_start = first_step[first_step.eid.isin(dfToList_all_prediabetes)]
+
+Fianlly we merge all the files together to get one dataframe with all the features which only contains the patients which we are able to classify into developing diabetes or not. The merge command is shown below.
+all_features_prediabetics_only = first_step_only_prediabetics_at_start.merge(second_step, on = 'eid').merge(third_step, on = 'eid').merge(fourth_step, on = 'eid')
+
+If we run all_features_prediabetes_only.shape we see that the shape is (11,785, 12,711) which is the number of patients we found and the total number of features.
 
 Now we finally have the whole dataframe with all the features for the prediabetic patients. 
 The next step is to save the dataframe as a csv, as we have done before, in order to send it back to the desktop using WinSCP.
