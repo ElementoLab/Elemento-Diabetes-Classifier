@@ -132,6 +132,7 @@ Age diabetes diagnosed - 2976-2.0
 Gestational diabetes only - 4041-0.0
 Gestational diabetes only - 4041-1.0
 Gestational diabetes only - 4041-2.0
+Fasting time - 74-0.0
 
 In HTML: ukb33822.csv.gz
 
@@ -142,8 +143,11 @@ Non-cancer illness code, self-reported - Use all 20002-0.0 to 20002-2.33 (99 col
 
 To begin, it would be most efficient to focus on finding the certain patients that will be involved in this study so that 
 we do not have to waste time waiting for computations on many pateints to run initially. 
-We do this by keeping only patients with an HbA1c measurement in the range 42 mmol/mol - 47 mmol/mol and a blood glucose measurement in the range 5.6 mmol/L - 7.0 mmol/L
-We cut out all doctor diagnosed diabetic patients who fall into our prediabetic ranges for the HbA1c and blood glucose measurements 
+We do this using two measurements. First, we keep patients with an HbA1c measurement in the range 42 mmol/mol - 47 mmol/mol
+Second, we use blood glucose to measure if a patient has prediabetes for patients who took a fasting blood sugar test.
+For patients who fasted 8 or more hours, prediabetes based on blood glucose level lies in the range 5.6 mmol/L - 7.0 mmol/L
+For patients who did not fast at least 8 hours, this test does not have a specified range for prediabetic patients, and therefore cannot be used.
+We removed all doctor diagnosed diabetic patients who fall into our prediabetic ranges for the HbA1c and blood glucose measurements 
 and also patients who have gestational diabetes only because these patients do not develop diabetes in the way we desire and may bias our model.
 
 For our analysis, we assume that self-diagnosis of diabetes is equivalent to true diagnosis of diabetes.
