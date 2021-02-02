@@ -216,8 +216,68 @@ first_step_only_prediabetics_at_start = first_step[first_step.eid.isin(dfToList_
 Fianlly we merge all the files together to get one dataframe with all the features which only contains the patients which we are able to classify into developing diabetes or not. The merge command is shown below.
 all_features_prediabetics_only = first_step_only_prediabetics_at_start.merge(second_step, on = 'eid').merge(third_step, on = 'eid').merge(fourth_step, on = 'eid')
 
-If we run all_features_prediabetes_only.shape we see that the shape is (5,003, 12,711) which is the number of patients we found and the total number of features.
+If we run all_features_prediabetes_only.shape we see that the shape is (5003, 12711) which is the number of patients we found and the total number of features.
 
 Now we finally have the whole dataframe with all the features for the prediabetic patients. 
 The next step is to save the dataframe as a csv, as we have done before, in order to send it back to the desktop using WinSCP.
 all_features_prediabetics_only.to_csv(path_or_buf = '~nib4003/for_winscp/all_features_prediabetics_only')
+
+6. Keeping Features For Final Model By Inspection - Look at Jupyter Notebook file "Machine Learning Start Using Model With All Features.ipynb"
+
+We now have a dataframe containing all 5003 patients who began with prediabetes and either progressed to a diabetic state (4261) or did not progress to diabetes (742) 
+who are described by a total of 12711 features. We notice that there are duplicate columns within the UKBiobank data which may be due to patients deciding to withdraw
+their information from the database after their initial measurements. To be ethical researchers, we keep the columns which contain less information so as to not exploit
+these patients. 
+
+We then cut all features from the dataframe which contain only NaN values since these will not give any information for classification. This totals 3224 columns.
+The next step in the pipeline is to cut all dates out of the dataframe. Since we trying to predict the patients who will and will not progress to a diabetic state
+based on their initial information, the dates involved do not provide the model with information about the outcome of the patient. 
+There are 54 different dates in the dataframe, some containing multiple entries. 
+
+The next thing we do is look at the first column for each feature (those that end in -0.0) for a large proportion of NaN values. 
+The reason we do this is because these columns mostly contain more information than the next numerical columns (-0.1 or -1.0) 
+and therefore if there are many NaN values in the -0.0 columns then there will not be enough information in total to have any weight on our model.
+We use a criteria of 80% NaN values or greater in a column to drop it from the dataframe. This results in a dataframe with 3901 columns.
+
+Our next step is to understand what all remaining columns represent and filter out those that are not important.
+The dataframe is composed of 3140 floats, 6 integers, and 755 objects.
+We begin our filtering with the object features. All features are labeled in the .ipynb notebook and labeled as to whether or not they will be kept for the next steps.
+We then drop columns which we believe have no relevance to the model's predictive ability. This results in a total of 3366 columns.
+We next look at the integer features. We again show the features in the .ipynb notebook and decide which to keep. We end up keeping e of the 6 integer columns (eid included).
+We finally look at the float features. In the .ipynb notebook we decide which to keep in our final model by expecting them in the HTML and on the UKBiobank. 
+After dropping the unnecessary float features, we are left with a dataframe with 1373 columns.
+
+Since we are to only focus on the initial data taken from the prediabetic patients, we drop all columns that do not end in X-0.X as these represent the recordings from
+the first visit to the assessment center by the patients. 
+However, we notice that there are some columns that are represented by one measurement in the form X-2.0, which we keep in the dataframe as well. 
+The resulting number of features remaining is 899.
+
+At this point, we further cut down on features with many NaN values. All columns with 30% or greater NaN values are dropped from the dataframe. The result is 217 columns.
+The makeup of these data types is 205 floats, 3 integer, and 9 objects. 
+
+Next we focus our attention on the remaining object columns. We believe that the only way to get information from these columns is to one hot encode the data 
+and we do not believe this will actually result in a greater prediction power of the model because there are numerous values that are taken by all patients.
+Values are not common among patients so the result would just be the creation of an enormous amount of columns that contain no information that helps us. 
+Therefore, we drop the object columns from the dataframe.
+
+We again label all remaining integer and float features. We find that some of our floats are categorical in nature and therefore we must one hot encode these columns using 
+pandas get_dummies. The NaN values remain in these columns when using this function.
+
+We notice that some of the float columns contain negatives, which our model does not allow for. 
+We therefore need to make a coding for these patients which rectifies the situation. All codings for all categorical floats are found in the .ipynb. 
+When we set the values of -1 and -3 to NaN, these will be filled in like any other NaN value with the median of the column.
+
+Next, we fill all NaN values in the remaining float columns with the median of each column, so as to not bias the center of each data distribution.
+
+We then read in the dataframe with each patient labeled correctly from "Prediabetes Classification.ipynb" and merge the target column with our current dataframe.
+
+After further inspection, we find that there are columns in our dataframe which contain only 0 values and therefore will not increase the model's prediction power.
+Therefore, we cut these columns from the dataframe, resulting in a dataframe with 479 columns after one hot encoding.
+
+Next, we normalize all remaining float columns. First, for all columns containing negative values, we subtract the minimum from all values (resulting in adding the 
+absolute value of the most negative number), resulting in only positive numbers. We then normalized all float columns by dividing each column by its maximum
+value, effectively resulting in the range of each column to be between 0 and 1. 
+
+We then saved this dataframe in csv format to be used in another notebook for further feature selection and machine learning model creation.
+
+
