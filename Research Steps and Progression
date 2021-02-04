@@ -280,4 +280,59 @@ value, effectively resulting in the range of each column to be between 0 and 1.
 
 We then saved this dataframe in csv format to be used in another notebook for further feature selection and machine learning model creation.
 
+7. Creation of a dataframe using episodes features from ukb26867 - Look at "Machine Learning Start Using Model With All Features and Feature Selection"
+and "Machine Learning After Inspection of All Features INCLUDING Episodes" and "Machine Learning After Inspection of All Features" (contains models without Episodes features 
+even though this notebook has been updated such that the analysis shows the addition of the Episodes columns before the models constructed at the end of the notebook)     
+
+We have gone back to the model and found that there are columns which begin with "Episodes" which we want to keep in the model because we believe they contain 
+information that can help the predictive power of the model. We redid the analysis in the "Machine Learning After Inspection of All Features" notebook and saved 
+this dataframe as 'prediabetes_df_after_data_manipulation_ready_for_feature_selection_with_episodes_data' to distinguish it from the dataframe we saved without the episodes
+columns entitled 'prediabetes_df_after_data_manipulation_ready_for_feature_selection'. In the "Machine Learning After Inspection of All Features" notebook, the models at 
+the end of this notebook use the 'prediabetes_df_after_data_manipulation_ready_for_feature_selection' dataframe, not the updated one that was created in this notebook. 
+In the notebook entited "Machine Learning After Inspection of All Features INCLUDING Episodes", we have made models using the 
+'prediabetes_df_after_data_manipulation_ready_for_feature_selection_with_episodes_data' dataframe and have shown that these features increase the AUC ROC when incorporated.
+
+8a. Adding ICD Codes Step 1 - Getting ICD Codes for Prediabetic Patients From SCU
+
+One thing we want to try to incorporate into the model is all the different diseases every prediabetic patient has. One way in which we believe this is possible is to make 
+a count of all the different diagnoses for a patient and use this as an extra feature. To do so, we must use the hesin.txt and hesin_diag.txt files again.
+Our commands are very similar to those described in 3., only this time we are keeping all diagnoses instead of just type 2 diabetes. The commands used are shown below.
+* Note we will be using python so use the information above in 2. to open python for the following use.
+
+First, we import the hesin_diag.txt file:
+hesin_diag = pd.read_csv('/athena/elementolab/scratch/nib4003/ukbiobank/hesin/hesin_diag.txt', sep = '\t')
+
+Next, we keep only the columns that will help us make the counts of diagnoses for each patient:
+necessary_columns_for_diagnosis = hesin_diag[['eid', 'ins_index', 'diag_icd9', 'diag_icd10']] 
+
+The next step is to import the hesin.txt file:
+hesin_txt = pd.read_csv('/athena/elementolab/scratch/nib4003/ukbiobank/hesin/hesin.txt', sep = '\t')
+
+We then cut down the columns for this file to those that we want to keep:
+hesin_txt_for_merge = hesin_txt[['eid', 'ins_index', 'epistart']] 
+
+Next we merge the two dataframes together by eid and ins_index to match the correct patients with the correct disease:
+all_patients_and_their_diagnoses = necessary_columns_for_diagnosis.merge(hesin_txt_for_merge, on = ['eid', 'ins_index'])  
+
+Since this results in a large number of rows, we want to keep only the prediabetic patient results. Therefore, we import our prediabetic dataframe.
+all_prediabetes = pd.read_csv('/home/nib4003/for_winscp/prediabetic_all_possible_to_classify_final')
+
+We have to drop an unncessary column that got dragged along:
+all_prediabetes = all_prediabetes.drop(columns = ['Unnamed: 0'])
+
+Below we make a list of the eid numbers for prediabetic patients:
+dfToList_all_prediabetes = all_prediabetes['eid'].tolist()
+
+Next we can keep only the prediabetic patients from the total dataframe:
+all_diagnoses_only_prediabetics_at_start = all_patients_and_their_diagnoses[all_patients_and_their_diagnoses.eid.isin(dfToList_all_prediabetes)]
+
+Finally, we save this dataframe for transfer to the SCU:
+all_diagnoses_only_prediabetics_at_start.to_csv(path_or_buf = '~nib4003/for_winscp/only_prediabetes_patients_all_diagnoses_for_every_disease')
+
+8b. Adding ICD Codes Step 2 - Applying ICD Codes To Prediabetic Patients - Look at "ICD Column Incorporation" Notebook
+
+In this notebook, we add the ICD codes to our model which begins using all features of the total dataframe in order to understand how multiple different diagnoses can 
+effect a patient. We want to see if more diagnoses increases the prediction power of the model that a prediabetic patient will or will not progress to a diabetic state. 
+
+
 
