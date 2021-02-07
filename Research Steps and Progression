@@ -329,10 +329,101 @@ all_diagnoses_only_prediabetics_at_start = all_patients_and_their_diagnoses[all_
 Finally, we save this dataframe for transfer to the SCU:
 all_diagnoses_only_prediabetics_at_start.to_csv(path_or_buf = '~nib4003/for_winscp/only_prediabetes_patients_all_diagnoses_for_every_disease')
 
+
 8b. Adding ICD Codes Step 2 - Applying ICD Codes To Prediabetic Patients - Look at "ICD Column Incorporation" Notebook
 
 In this notebook, we add the ICD codes to our model which begins using all features of the total dataframe in order to understand how multiple different diagnoses can 
 effect a patient. We want to see if more diagnoses increases the prediction power of the model that a prediabetic patient will or will not progress to a diabetic state. 
 
 
+9. Prediabetic Classification and Progression to Diabetes Labeling With Assumption That All Patients Who Have Diabetes Are Explicitly Labeled (Using ICD Codes Or Diabetes
+Diagnosed by Doctor Columns Directly From UKBiobank) - Look at Jupyter Notebook file "Prediabetic Classification keeping ALL Prediabetic Patients.ipynb"
 
+To begin, it would be most efficient to focus on finding the certain patients that will be involved in this study so that 
+we do not have to waste time waiting for computations on many pateints to run initially. 
+We do this using two measurements. First, we keep patients with an HbA1c measurement in the range 42 mmol/mol - 47 mmol/mol
+Second, we use blood glucose to measure if a patient has prediabetes for patients who took a fasting blood sugar test.
+For patients who fasted 8 or more hours, prediabetes based on blood glucose level lies in the range 5.6 mmol/L - 7.0 mmol/L
+For patients who did not fast at least 8 hours, this test does not have a specified range for prediabetic patients, and therefore cannot be used.
+We removed all doctor diagnosed diabetic patients who fall into our prediabetic ranges for the HbA1c and blood glucose measurements 
+and also patients who have gestational diabetes only because these patients do not develop diabetes in the way we desire and may bias our model.
+
+For our analysis, we assume that self-diagnosis of diabetes is equivalent to true diagnosis of diabetes.
+Therefore, we need to take into account patients which we classify as prediabetic, but who self-diagnose themselves as diabetic at the start of the study.
+These patients must be cut from the dataframe because we assume that they begin the study with diabetes, not prediabetes.
+We also need to consider prediabetic patients who are never diagnosed with diabetes (through the doctor diagnosis columns 2443-X.X or through the ICD values),
+but do self-diagnose themselves with diabetes. We need to keep these patients in the dataframe and classify them as prediabetes who progress to diabetes.
+
+We use two sequential ideas to create the group of patients who will be kept for our classifier for non-self-diagnosis patients and how to label them:
+
+The first is to use the ICD column in which prediabetic patients are diagnosed with diabetes after their initial prediabetic classification. 
+This is done by comparing the "Date of attending assessment centre" (53-0.0) column from the ukb42385 csv file with the "epistart" column from the "hesin.txt" file.
+Prediabetic classified patients with a "Date of attending assessment centre" before the "epistart" date are labeled as developing diabetes.
+Prediabetic classified patients with an "epistart" date before the "Date of attending assessment centre" have diabetes before the actual prediabetic classification,
+and must be cut from the patients we classified as prediabetic because they are truly classified as diabetics. 
+Once we have found all patients who are shown to develop diabetes from the ICD codes 
+(E110-E119 for Type 2 Diabetes shown here for Non-insulin-dependent diabetes mellitus - https://biobank.ndph.ox.ac.uk/showcase/coding.cgi?id=19&nl=1),
+we cut them from the total dataframe of prediabetic patients since we already know they are to be labeled as progressing to diabetes.
+
+The second idea is to then filter through the remaining prediabetic patients 
+and keep only the patients who we know either developed diabetes or did not develop diabetes at a later date.
+To do this, we only keep prediabetic patients in our study that contain values in columns in which a doctor diagnosis whether a patient has diabetes or not 
+at a later date when a patient returns and is re-evaluated (2443-1.0 and 2443-2.0). We must cut all the prediabetic classified patients from the final dataframe 
+who do not have a confirmational value of whether or not they developed diabetes. We can then label the patients as developing diabetes 
+if they begin classified as prediabetic (2443-0.0) but later are diagnosed with diabetes (2443-1.0 or 2443-2.0).
+
+These two ideas allow us to label all our targets as progressing to diabetes or not. We then take a list of all eid numbers for prediabetic patients progressing 
+to a diabetic state and label them. We also do the same for the remaining prediabetic patients who did not progress to a diabetic state.
+We can then save our final dataframe to a csv and export it to the SCU using WinSCP where we begin the next step.
+
+
+
+10. Using the SCU to create a dataframe for all the remaining patients that contains all the features from the UKBiobank to be used for feature selection for the sample
+of patients which we assume do not progress to diabetes if not explicitly stated through ICD or doctor diagnosis of diabetes from UKBiobank columns directly.
+
+The next step is to make a classifier that contains many columns that we want to cut down using feature selection. 
+We first start by using Linux commands to create our 4 files that contain all the HTML features (whole_file26867, whole_file_33822, whole_file_41972, whole_file_42385). 
+We next need to combine all the features with the dataframe we created of all classified prediabetic patients so that the computation does not take a long time. 
+First, we import our prediabetic patient dataframe.
+all_prediabetes = pd.read_csv('for_winscp/prediabetic_all_possible_to_classify_keeping_all_prediabetic_patients_final')
+
+An additional column comes along with the above dataframe that we need to drop, shown below.
+all_prediabetes = all_prediabetes.drop(columns = ['Unnamed: 0'])
+
+Next we make a list of the eid values of the prediabetic patients at the start of the study.
+dfToList_all_prediabetes = all_prediabetes['eid'].tolist()
+
+Next we need to import the four large files with all the features. An example is shown below but we need to do this for all the files. 
+This does take a long time for every file since they are so large.
+first_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_26867')
+
+We can look at the new number of features using the command below.
+less_features_first_step.shape
+
+The complete list of commands for all four files is shown below (includes the previous 3):
+first_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_26867')
+first_step.shape
+second_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_33822')
+second_step.shape
+third_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_41972')
+third_step.shape
+fourth_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_42385')
+fourth_step.shape
+
+We then keep only the patients from the first_step dataframe that match our eid numbers for the prediabetic patients.
+first_step_only_prediabetics_at_start = first_step[first_step.eid.isin(dfToList_all_prediabetes)]
+
+Fianlly we merge all the files together to get one dataframe with all the features which only contains the patients which we are able to classify into developing diabetes or not. The merge command is shown below.
+all_features_prediabetics_only = first_step_only_prediabetics_at_start.merge(second_step, on = 'eid').merge(third_step, on = 'eid').merge(fourth_step, on = 'eid')
+
+If we run all_features_prediabetes_only.shape we see that the shape is (5003, 12711) which is the number of patients we found and the total number of features.
+
+Now we finally have the whole dataframe with all the features for the prediabetic patients. 
+The next step is to save the dataframe as a csv, as we have done before, in order to send it back to the desktop using WinSCP.
+all_features_prediabetics_only.to_csv(path_or_buf = '~nib4003/for_winscp/all_features_prediabetics_only_keeping_all_prediabetic_patients')
+
+*Notice the only change between this and step 5. is the importing of the correct dataframe to being and the export of the final dataframe with a new name including 
+"keeping_all_prediabetic_".
+
+
+11. 
