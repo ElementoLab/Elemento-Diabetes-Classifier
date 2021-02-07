@@ -222,6 +222,7 @@ Now we finally have the whole dataframe with all the features for the prediabeti
 The next step is to save the dataframe as a csv, as we have done before, in order to send it back to the desktop using WinSCP.
 all_features_prediabetics_only.to_csv(path_or_buf = '~nib4003/for_winscp/all_features_prediabetics_only')
 
+
 6. Keeping Features For Final Model By Inspection - Look at Jupyter Notebook file "Machine Learning Start Using Model With All Features.ipynb"
 
 We now have a dataframe containing all 5003 patients who began with prediabetes and either progressed to a diabetic state (4261) or did not progress to diabetes (742) 
@@ -280,6 +281,7 @@ value, effectively resulting in the range of each column to be between 0 and 1.
 
 We then saved this dataframe in csv format to be used in another notebook for further feature selection and machine learning model creation.
 
+
 7. Creation of a dataframe using episodes features from ukb26867 - Look at "Machine Learning Start Using Model With All Features and Feature Selection"
 and "Machine Learning After Inspection of All Features INCLUDING Episodes" and "Machine Learning After Inspection of All Features" (contains models without Episodes features 
 even though this notebook has been updated such that the analysis shows the addition of the Episodes columns before the models constructed at the end of the notebook)     
@@ -291,6 +293,7 @@ columns entitled 'prediabetes_df_after_data_manipulation_ready_for_feature_selec
 the end of this notebook use the 'prediabetes_df_after_data_manipulation_ready_for_feature_selection' dataframe, not the updated one that was created in this notebook. 
 In the notebook entited "Machine Learning After Inspection of All Features INCLUDING Episodes", we have made models using the 
 'prediabetes_df_after_data_manipulation_ready_for_feature_selection_with_episodes_data' dataframe and have shown that these features increase the AUC ROC when incorporated.
+
 
 8a. Adding ICD Codes Step 1 - Getting ICD Codes for Prediabetic Patients From SCU
 
@@ -375,7 +378,6 @@ if they begin classified as prediabetic (2443-0.0) but later are diagnosed with 
 These two ideas allow us to label all our targets as progressing to diabetes or not. We then take a list of all eid numbers for prediabetic patients progressing 
 to a diabetic state and label them. We also do the same for the remaining prediabetic patients who did not progress to a diabetic state.
 We can then save our final dataframe to a csv and export it to the SCU using WinSCP where we begin the next step.
-
 
 
 10. Using the SCU to create a dataframe for all the remaining patients that contains all the features from the UKBiobank to be used for feature selection for the sample
