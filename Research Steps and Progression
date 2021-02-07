@@ -202,13 +202,13 @@ less_features_first_step.shape
 
 The complete list of commands for all four files is shown below (includes the previous 3):
 first_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_26867')
-less_features_first_step.shape
+first_step.shape
 second_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_33822')
-less_features_second_step.shape
+second_step.shape
 third_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_41972')
-less_features_third_step.shape
+third_step.shape
 fourth_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_42385')
-less_features_fourth_step.shape
+fourth_step.shape
 
 We then keep only the patients from the first_step dataframe that match our eid numbers for the prediabetic patients.
 first_step_only_prediabetics_at_start = first_step[first_step.eid.isin(dfToList_all_prediabetes)]
