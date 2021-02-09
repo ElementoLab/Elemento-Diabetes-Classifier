@@ -282,9 +282,10 @@ value, effectively resulting in the range of each column to be between 0 and 1.
 We then saved this dataframe in csv format to be used in another notebook for further feature selection and machine learning model creation.
 
 
-7. Creation of a dataframe using episodes features from ukb26867 - Look at "Machine Learning Start Using Model With All Features and Feature Selection"
+7. Creation of a dataframe using "Episodes" features from ukb26867 and Analysis of Model - Look at "Machine Learning Start Using Model With All Features and Feature Selection"
 and "Machine Learning After Inspection of All Features INCLUDING Episodes" and "Machine Learning After Inspection of All Features" (contains models without Episodes features 
-even though this notebook has been updated such that the analysis shows the addition of the Episodes columns before the models constructed at the end of the notebook)     
+even though this notebook has been updated such that the analysis shows the addition of the Episodes columns before the models constructed at the end of the notebook) and
+"Parameter Tuning for Model With Episodes Features"
 
 We have gone back to the model and found that there are columns which begin with "Episodes" which we want to keep in the model because we believe they contain 
 information that can help the predictive power of the model. We redid the analysis in the "Machine Learning After Inspection of All Features" notebook and saved 
@@ -293,6 +294,10 @@ columns entitled 'prediabetes_df_after_data_manipulation_ready_for_feature_selec
 the end of this notebook use the 'prediabetes_df_after_data_manipulation_ready_for_feature_selection' dataframe, not the updated one that was created in this notebook. 
 In the notebook entited "Machine Learning After Inspection of All Features INCLUDING Episodes", we have made models using the 
 'prediabetes_df_after_data_manipulation_ready_for_feature_selection_with_episodes_data' dataframe and have shown that these features increase the AUC ROC when incorporated.
+
+The notebook "Parameter Tuning for Model With Episodes Features" contains a section in which we attempt to change the parameters of the Random Forest Classifier in order 
+to receive better metrics. We do this by changing the values of many of the hyperparameters for the model and observing the changes in the ROC AUC and confusion matrices
+for cross fold validation. Our results show that the default parameters seem to work optimally for our model.
 
 
 8a. Adding ICD Codes Step 1 - Getting ICD Codes for Prediabetic Patients From SCU
@@ -428,4 +433,71 @@ all_features_prediabetics_only.to_csv(path_or_buf = '~nib4003/for_winscp/all_fea
 "keeping_all_prediabetic_".
 
 
-11. 
+11. Testing Model Created Using the Sample Of Patients Which We Assume Do Not Progress to Diabetes If Not Explicitly Stated Through ICD Or 
+Doctor Diagnosis Of Diabetes From UKBiobank Columns Directly - Look at Notebook "Machine Learning Start Using Model With All Features keeping ALL prediabetic patients.ipynb"
+
+In this notebook, we run through the same analysis previously performed in "Machine Learning Start Using Model With All Features.ipynb" but this time we had a larger 
+sample size due to our assumption that prediabetic patients who are not classified as diabetic remain prediabetic. We show in this notebook that even though we have a much
+larger sample size, our results are actually worse than the results without the assumption. Therefore, we find that more data is not as good as quality data. 
+We do not further our analysis with this assumption due to its worse performance. 
+
+
+12. Testing Using Many Machine Learning Algorithms - Look at Notebook "All Models Matt Used Applied"
+
+After Matt Wickersham's great presentation, we decided to follow his steps and use all ML algorithms he used for his classification of alcohol usage. We also added the 
+algorithms Complement Naive Bayes, Linear SVM, and Easy Ensemble. 
+
+In this notebook, we use stratified k fold cross validation, due to the imabalance between our cohort group sample sizes, with the number of splits equal to 10. 
+For all ML algorithms, we calculate the accuracy, area under the receiver operating characteristic curve, area under the precision recall curve, f1 scores, 
+and all corresponding standard deviations to show as metrics for the classification of prediabetic patients progressing to a diabetic state. 
+We also plot an ROC AUC curve corresponding to every algorithm together to compare the results of the different models for this metric.
+We also plot a precision recall curve corresponding to every algorithm together to compare the results of the different models for this metric.
+Tables of these values have been created using Word to show all results in the same place. 
+
+
+13. Incorporating New Features Using ICD Codes for Patients With Hypertension or Obesity and The Number of Diseases - Look at Notebook "ICD Column Incorporation.ipynb"
+
+In this notebook, we use the ICD10 column from the hesin files in the SCU to create two features which we add to the model which was created using all features to begin. 
+
+1. The first feature is the number of diseases a patient has before their initial measurments at the assessment center. We count all the diseases a patient is diagnosed
+with that have an epistart date before the date of attending assessment center column. We then add these values into the overall dataframe with all the features.
+For patients who do not have a reported medication being taken, we give them a value of 0.
+
+2. The second feature is the labeling of whether a patient had obesity and/or hypertension before the initial measurements were taken, once again comparing the epistart 
+and date of attending assessment center columns. We believe that the prediabetic patients who had obesity and/or hypertension would most likely develop diabetes and 
+would provide the model with a better prediction power. 
+
+Unfortunately, after incorporation of these features into our model, we found that their feature importances were extremely low and had no impact on the model. Therefore,
+we decide not to use them as features in future models.
+
+
+14. Running Statistical Tests Between Different Cohort Features - Look at Notebook "Demographic and Other Information for Different Cohorts"
+
+In this notebook, we recreated Matt Wickersham's tables for his project which contain different demographic and medical information for the two cohorts. 
+We calculate the average values of many features in the model, and run Levene's test on all continous variables first to determine if the variance of the two groups differ
+in respect to any of the features. We find that this is the case only for the age of the patients between the two cohorts. We then used independent t-tests to statistically
+show if there is a significant difference between the means of the features we included for cohorts. We discovered that the only feature with a statistically significant 
+difference between the means is Age. 
+
+
+15. Comparison of Model With and Without HbA1c and Glucose Features - Look at Notebooks "ML Model Feature Selection WITH HBA1C and GLUCOSE.ipynb" and "Feature Selection and Machine Learning After Inspection of All Features.ipynb"
+
+The first notebook contains a model with HbA1c and Glucose, while the second notebook does not contain these features. We see that the model that does contain them 
+performs better, and HbA1c is even a top feature. We believe that even though we used this to define our patients who are prediabetic, this feature is still necessary 
+to keep in the model and there is no bias resulting from leaving it in the model.
+
+
+16. Creation of New Model By Adding New Features From Literature to Previous Model With Only Features From Literature - Look at 
+Notebook "Machine Learning Start Features From Literature With More Features Added" - 
+contains additional features from https://bmcmedinformdecismak.biomedcentral.com/articles/10.1186/s12911-019-0918-5
+
+In this notebook, we add new features from the source above. This paper used machine learning models to predict prediabetic patients from non-prediabetic patients.
+Although this is not the same task as us, they provide what could be used as a baseline for comparison with our model's metrics. This paper also discusses other papers and 
+lists some of the features from those publications, which this lab group also inclued in their models. 
+
+We show that with the inclusion of the new features in our model, the ROC AUC is greater than that of the first model created without the features. However, the performance
+is not as good as the model which began using all features. We also repeat the analysis in "All Models Matt Used Applied " to get the metrics for all machine learning 
+algorithms. A table was created which contains the accuracy, AUC ROC, AUPRC, F1 score, and the uncertainties for all metrics for classifying prediabetic patients 
+progressing to a diabetic state.
+
+
