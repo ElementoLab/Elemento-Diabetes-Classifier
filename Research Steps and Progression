@@ -501,7 +501,34 @@ algorithms. A table was created which contains the accuracy, AUC ROC, AUPRC, F1 
 progressing to a diabetic state.
 
 
-17. Creation of Model Using Patients Who Progress To A Diabetic State WIthin One Year Of Prediabetic Classification Based On Their Attending Assessment Center Date -
-Look at Notebbok "Model Using Patients Who Progress to Diabetes Within One Year"
+17. Creation of Model Using Patients Who Progress To A Diabetic State WIthin Certain Time Frames Of Prediabetic Classification Based On Their Attending Assessment Center Date -
+Look at Notebboks "Model Using Patients Who Progress to Diabetes Within One Year" and "Model Using Patients Who Progress to Diabetes Within Two Years"
+and "Model Using Patients Who Progress to Diabetes Within Three Years" and "Model Using Patients Who Progress to Diabetes Within Four Years" 
+and "Model Using Patients Who Progress to Diabetes Within Five Years" and "Model Using Patients Who Progress to Diabetes Within 10 Years"
+
+In these notebooks, we created models that contain only part of the total target group for patients who progress to diabetes. Each notebook specifies a condition that the
+patients must be diagnosed with diabetes within one, two, three, four, five, or ten years, respectively, from the date when attending the assessment center initially.
+These patient groups were created by using the ICD codes for patients diagnosed with diabetes, the epistart column which gives the date when the patient is diagnosed with 
+diabetes, and the Date of attending assessment centre column which records the date when the patient begins his/her involvement in the study. We keep only prediabetic
+patients at the beginning of their involvement in the study, and keep only patients who are confirmed to not progress to a diabetic state and patients who are 
+diagnosed with diabetes after the start of the data collection within the time frame specified. 
+
+Once receiving these patient groups, we follow the analysis of the notebook "All Models Matt Used Applied". We also included the calculation of feature importances for 
+the machine learning algorithms Linear SVM, XGBoost, and Logistic regression. Our goal was to track the most important features as the time allowed for diabetes diagnosis of 
+patients increased. This would have the potential for us to find features that are integral to diagnosis of patients in the near and far future, resulting in the creation of 
+a robust model that generalizes well to new patients. 
+
+Therefore, we look at the most common features between all the models to see which features have a large impact on all patients over time. 
+We have found that HbA1c, Glucose, Waist Circumference among most common, and episodes containing diagnoses secondary ICD10 data found in every XGBoost top 3 important features.
+With this information, we can begin to think about narrowing down which features we should keep for a final model that we suspect will receive nearly as good metrics 
+as the models using all features. This will give us features that we may be able to use in clinical settings to help medical professionals classify prediabetic patients
+who have an increased risk of developing diabetes.
+
+
+18. Looking at Metrics For Model Using All Prediabetics With Assumption That All Prediabetic Patients Not Diagnosed With Diabetes Are Still Prediabetic
+- Look at Notebook "Machine Learning Start Using Model With All Features keeping ALL prediabetic patients"
+
+
+
 
 
