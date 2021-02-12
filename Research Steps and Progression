@@ -530,13 +530,21 @@ who have an increased risk of developing diabetes.
 
 
 
-19. Using Equal Cohort Sizes Without Assumption That All Prediabetic Patients Not Diagnosed With Diabetes Are Still Prediabetic - Look at Notebook ""
+19. Using Equal Cohort Sizes Without Assumption That All Prediabetic Patients Not Diagnosed With Diabetes Are Still Prediabetic - 
+Look at Notebook "All Models Matt Used Applied With Equal Cohort Sizes"
+
+In this notebook, we repeat all analyses from the notebook "All Models Matt Used Applied", but we take a random sample of 742 patients from the cohort of patients that progress
+to a diabetic state so that the two cohort sizes are equal. Our goal is to reduce the biased prediction due to unequal sample sizes we have seen in earlier notebooks
+when looking at the sensitivity, specificity, and confusion matrix of different machine learning algorithms.
 
 
+20. Using Equal Cohort Sizes With Assumption That All Prediabetic Patients Not Diagnosed With Diabetes Are Still Prediabetic -
+Look at Notebook "All Models Matt Used Applied Keeping ALL Prediabetics With Equal Cohort Sizes"
 
-20. Using Equal Cohort Sizes With Assumption That All Prediabetic Patients Not Diagnosed With Diabetes Are Still Prediabetic - Look at Notebook ""
-
-
+In this notebook, we follow in the footsteps of "All Models Matt Used Applied With Equal Cohort Sizes" but this time we use the patient cohort which assumes that all prediabetic
+patients who are not diagnosed with diabetes during the experiment remain prediabetic, even without explicit confirmation. We take a random sample of 4,261 patients from 
+the group of patients not progressing to diabetes so that we receive equal sample sizes. Again, this is done to reduce the bias of prediction we have seen when viewing the
+results of the sensitivity, specificity, and confusion matrix of different machine learning algorithms.
 
 
 21. Incorporating Polygenic Risk Score
