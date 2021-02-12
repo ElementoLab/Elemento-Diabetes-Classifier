@@ -530,5 +530,27 @@ who have an increased risk of developing diabetes.
 
 
 
+19. Using Equal Cohort Sizes Without Assumption That All Prediabetic Patients Not Diagnosed With Diabetes Are Still Prediabetic - Look at Notebook ""
+
+
+
+20. Using Equal Cohort Sizes With Assumption That All Prediabetic Patients Not Diagnosed With Diabetes Are Still Prediabetic - Look at Notebook ""
+
+
+
+
+21. Incorporating Polygenic Risk Score
+21a. Unzipping file in SCU
+
+First, we received the file "for_nick_ethnic.txt.gz" from Scott and downloaded it. This file contains the polygenic risk scores for diabetic patients of different ethnicities
+than caucasion. We then transferred it to the SCU and to unzip it we used the command:
+gzip -d for_nick_ethnic.txt.gz
+
+We then transferred the unzipped .txt file back to the Elemento_Research folder on the computer and imported it to jupyter notebook for incorporation into the model.
+
+22a. Results of Using Total Amount of Polygenic Risk Scores - Look at Notebook ""
+
+In this notebook, we apply all polygenic risk scores for diabetic patients. We first merge the two polygenic risk score dataframes together and then run the analysis as usual.
+
 
 
