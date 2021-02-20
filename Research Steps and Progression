@@ -139,7 +139,7 @@ In HTML: ukb33822.csv.gz
 Non-cancer illness code, self-reported - Use all 20002-0.0 to 20002-2.33 (99 columns in total)
 
 
-4. Prediabetic Classification and Progression to Diabetes Labeling - Look at Jupyter Notebook file "Prediabetes Classification.ipynb"
+4. Prediabetic Classification and Progression to Diabetes Labeling - Look at Jupyter Notebook file "Model 1, 2 - Prediabetes Classification.ipynb"
 
 To begin, it would be most efficient to focus on finding the certain patients that will be involved in this study so that 
 we do not have to waste time waiting for computations on many pateints to run initially. 
@@ -223,7 +223,7 @@ The next step is to save the dataframe as a csv, as we have done before, in orde
 all_features_prediabetics_only.to_csv(path_or_buf = '~nib4003/for_winscp/all_features_prediabetics_only')
 
 
-6. Keeping Features For Final Model By Inspection - Look at Jupyter Notebook file "Machine Learning Start Using Model With All Features.ipynb"
+6. Keeping Features For Final Model By Inspection - Look at Jupyter Notebook file "Model 1 - Machine Learning Start Using Model With All Features.ipynb"
 
 We now have a dataframe containing all 5003 patients who began with prediabetes and either progressed to a diabetic state (4261) or did not progress to diabetes (742) 
 who are described by a total of 12711 features. We notice that there are duplicate columns within the UKBiobank data which may be due to patients deciding to withdraw
@@ -282,10 +282,11 @@ value, effectively resulting in the range of each column to be between 0 and 1.
 We then saved this dataframe in csv format to be used in another notebook for further feature selection and machine learning model creation.
 
 
-7. Creation of a dataframe using "Episodes" features from ukb26867 and Analysis of Model - Look at "Machine Learning Start Using Model With All Features and Feature Selection"
-and "Machine Learning After Inspection of All Features INCLUDING Episodes" and "Machine Learning After Inspection of All Features" (contains models without Episodes features 
+7. Creation of a dataframe using "Episodes" features from ukb26867 and Analysis of Model - Look at 
+"Model 1 - Machine Learning After Inspection of All Features INCLUDING Episodes" and 
+"Model 1 - Feature Selection and Machine Learning After Inspection of All Features With and Without prs" (contains models without Episodes features 
 even though this notebook has been updated such that the analysis shows the addition of the Episodes columns before the models constructed at the end of the notebook) and
-"Parameter Tuning for Model With Episodes Features"
+"Model 1 - Parameter Tuning for Model With Episodes Features"
 
 We have gone back to the model and found that there are columns which begin with "Episodes" which we want to keep in the model because we believe they contain 
 information that can help the predictive power of the model. We redid the analysis in the "Machine Learning After Inspection of All Features" notebook and saved 
@@ -342,10 +343,11 @@ all_diagnoses_only_prediabetics_at_start.to_csv(path_or_buf = '~nib4003/for_wins
 
 In this notebook, we add the ICD codes to our model which begins using all features of the total dataframe in order to understand how multiple different diagnoses can 
 effect a patient. We want to see if more diagnoses increases the prediction power of the model that a prediabetic patient will or will not progress to a diabetic state. 
+This is further explained later on in step 13.
 
 
 9. Prediabetic Classification and Progression to Diabetes Labeling With Assumption That All Patients Who Have Diabetes Are Explicitly Labeled (Using ICD Codes Or Diabetes
-Diagnosed by Doctor Columns Directly From UKBiobank) - Look at Jupyter Notebook file "Prediabetic Classification keeping ALL Prediabetic Patients.ipynb"
+Diagnosed by Doctor Columns Directly From UKBiobank) - Look at Jupyter Notebook file "Model 3 - Prediabetic Classification keeping ALL Prediabetic Patients.ipynb"
 
 To begin, it would be most efficient to focus on finding the certain patients that will be involved in this study so that 
 we do not have to waste time waiting for computations on many pateints to run initially. 
@@ -434,7 +436,7 @@ all_features_prediabetics_only.to_csv(path_or_buf = '~nib4003/for_winscp/all_fea
 
 
 11. Testing Model Created Using the Sample Of Patients Which We Assume Do Not Progress to Diabetes If Not Explicitly Stated Through ICD Or 
-Doctor Diagnosis Of Diabetes From UKBiobank Columns Directly - Look at Notebook "Machine Learning Start Using Model With All Features keeping ALL prediabetic patients.ipynb"
+Doctor Diagnosis Of Diabetes From UKBiobank Columns Directly - Look at Notebook "Model 3 - Machine Learning Start Using Model With All Features keeping ALL prediabetic patients.ipynb"
 
 In this notebook, we run through the same analysis previously performed in "Machine Learning Start Using Model With All Features.ipynb" but this time we had a larger 
 sample size due to our assumption that prediabetic patients who are not classified as diabetic remain prediabetic. We show in this notebook that even though we have a much
@@ -442,7 +444,7 @@ larger sample size, our results are actually worse than the results without the 
 We do not further our analysis with this assumption due to its worse performance. 
 
 
-12. Testing Using Many Machine Learning Algorithms - Look at Notebook "All Models Matt Used Applied"
+12. Testing Using Many Machine Learning Algorithms - Look at Notebook "Model 1 - All Models Matt Used Applied"
 
 After Matt Wickersham's great presentation, we decided to follow his steps and use all ML algorithms he used for his classification of alcohol usage. We also added the 
 algorithms Complement Naive Bayes, Linear SVM, and Easy Ensemble. 
@@ -471,7 +473,7 @@ Unfortunately, after incorporation of these features into our model, we found th
 we decide not to use them as features in future models.
 
 
-14. Running Statistical Tests Between Different Cohort Features - Look at Notebook "Demographic and Other Information for Different Cohorts"
+14. Running Statistical Tests Between Different Cohort Features - Look at Notebook "Model 1, 2 - Demographic and Other Information for Different Cohorts"
 
 In this notebook, we recreated Matt Wickersham's tables for his project which contain different demographic and medical information for the two cohorts. 
 We calculate the average values of many features in the model, and run Levene's test on all continous variables first to determine if the variance of the two groups differ
@@ -480,7 +482,8 @@ show if there is a significant difference between the means of the features we i
 difference between the means is Age. 
 
 
-15. Comparison of Model With and Without HbA1c and Glucose Features - Look at Notebooks "ML Model Feature Selection WITH HBA1C and GLUCOSE.ipynb" and "Feature Selection and Machine Learning After Inspection of All Features.ipynb"
+15. Comparison of Model With and Without HbA1c and Glucose Features - Look at Notebooks 
+"Model 1 - ML Model Feature Selection WITH HBA1C and GLUCOSE.ipynb" and "Model 1 - Feature Selection and Machine Learning After Inspection of All Features With and Without prs.ipynb"
 
 The first notebook contains a model with HbA1c and Glucose, while the second notebook does not contain these features. We see that the model that does contain them 
 performs better, and HbA1c is even a top feature. We believe that even though we used this to define our patients who are prediabetic, this feature is still necessary 
@@ -488,7 +491,7 @@ to keep in the model and there is no bias resulting from leaving it in the model
 
 
 16. Creation of New Model By Adding New Features From Literature to Previous Model With Only Features From Literature - Look at 
-Notebook "Machine Learning Start Features From Literature With More Features Added" - 
+Notebook "Model 2.1 - Machine Learning Start Features From Literature With More Features Added" - 
 contains additional features from https://bmcmedinformdecismak.biomedcentral.com/articles/10.1186/s12911-019-0918-5
 
 In this notebook, we add new features from the source above. This paper used machine learning models to predict prediabetic patients from non-prediabetic patients.
@@ -501,12 +504,15 @@ algorithms. A table was created which contains the accuracy, AUC ROC, AUPRC, F1 
 progressing to a diabetic state.
 
 
-17. Creation of Model Using Patients Who Progress To A Diabetic State WIthin Certain Time Frames Of Prediabetic Classification Based On Their Attending Assessment Center Date -
-Look at Notebboks "Model Using Patients Who Progress to Diabetes Within One Year" and "Model Using Patients Who Progress to Diabetes Within Two Years"
-and "Model Using Patients Who Progress to Diabetes Within Three Years" and "Model Using Patients Who Progress to Diabetes Within Four Years" 
-and "Model Using Patients Who Progress to Diabetes Within Five Years" and "Model Using Patients Who Progress to Diabetes Within 10 Years"
+17. Creation of Models Using Patients Who Progress To A Diabetic State WIthin Certain Time Frames Of Prediabetic Classification Based On Their Attending Assessment Center Date 
+and all their demographic cohort comparisons - Look at Notebooks "Model 4.1 - Model Using Patients Who Progress to Diabetes Within One Year" and 
+"Model 4.2 - Model Using Patients Who Progress to Diabetes Within Two Years"
+and "Model 4.3 - Model Using Patients Who Progress to Diabetes Within Three Years" and "Model 4.4 - Model Using Patients Who Progress to Diabetes Within Four Years" and
+"Model 4.4a - Model Using Patients Who Progress to Diabetes Within Four Years Without Using Class Weights - No Differences.ipynb" (Changes weighting of algorithms from Model 4.4)
+and "Model 4.5 - Model Using Patients Who Progress to Diabetes Within Five Years" and "Model 4.10 - Model Using Patients Who Progress to Diabetes Within 10 Years" 
+and "Model 4.1 - 4.10 - Comparison of ALL Patient Cohorts.ipynb"
 
-In these notebooks, we created models that contain only part of the total target group for patients who progress to diabetes. Each notebook specifies a condition that the
+In all notebooks but last, we created models that contain only part of the total target group for patients who progress to diabetes. Each notebook specifies a condition that the
 patients must be diagnosed with diabetes within one, two, three, four, five, or ten years, respectively, from the date when attending the assessment center initially.
 These patient groups were created by using the ICD codes for patients diagnosed with diabetes, the epistart column which gives the date when the patient is diagnosed with 
 diabetes, and the Date of attending assessment centre column which records the date when the patient begins his/her involvement in the study. We keep only prediabetic
@@ -524,14 +530,18 @@ With this information, we can begin to think about narrowing down which features
 as the models using all features. This will give us features that we may be able to use in clinical settings to help medical professionals classify prediabetic patients
 who have an increased risk of developing diabetes.
 
+The notebook "Model 4.1 - 4.10 - Comparison of ALL Patient Cohorts.ipynb" compares the patient demographics between all models involved.
+
 
 18. Looking at Metrics For Model Using All Prediabetics With Assumption That All Prediabetic Patients Not Diagnosed With Diabetes Are Still Prediabetic
-- Look at Notebook "Machine Learning Start Using Model With All Features keeping ALL prediabetic patients"
+- Look at Notebook "Model 3 - Machine Learning Start Using Model With All Features keeping ALL prediabetic patients"
 
-
+This model runs all algorithms with the patient groups being patients who we assume do not develop diabetes since they are not specified to vs. patients we know develop diabetes.
+It does not perform as well as models 1, 2, or 2.1 and therefore we believe that we cannot assume that patients who are not marked as developing diabetes truly do not 
+develop it. Later on, it will be our goal to classify these patients correctly.
 
 19. Using Equal Cohort Sizes Without Assumption That All Prediabetic Patients Not Diagnosed With Diabetes Are Still Prediabetic - 
-Look at Notebook "All Models Matt Used Applied With Equal Cohort Sizes"
+Look at Notebook "Model 5 - All Models Matt Used Applied With Equal Cohort Sizes"
 
 In this notebook, we repeat all analyses from the notebook "All Models Matt Used Applied", but we take a random sample of 742 patients from the cohort of patients that progress
 to a diabetic state so that the two cohort sizes are equal. Our goal is to reduce the biased prediction due to unequal sample sizes we have seen in earlier notebooks
@@ -539,12 +549,12 @@ when looking at the sensitivity, specificity, and confusion matrix of different 
 
 
 20. Using Equal Cohort Sizes With Assumption That All Prediabetic Patients Not Diagnosed With Diabetes Are Still Prediabetic -
-Look at Notebook "All Models Matt Used Applied Keeping ALL Prediabetics With Equal Cohort Sizes"
+Look at Notebook "Model 3.1 - All Models Matt Used Applied Keeping ALL Prediabetics With Equal Cohort Sizes"
 
-In this notebook, we follow in the footsteps of "All Models Matt Used Applied With Equal Cohort Sizes" but this time we use the patient cohort which assumes that all prediabetic
-patients who are not diagnosed with diabetes during the experiment remain prediabetic, even without explicit confirmation. We take a random sample of 4,261 patients from 
-the group of patients not progressing to diabetes so that we receive equal sample sizes. Again, this is done to reduce the bias of prediction we have seen when viewing the
-results of the sensitivity, specificity, and confusion matrix of different machine learning algorithms.
+In this notebook, we follow in the footsteps of "Model 5 - All Models Matt Used Applied With Equal Cohort Sizes" but this time we use the patient cohort which assumes that 
+all prediabetic patients who are not diagnosed with diabetes during the experiment remain prediabetic, even without explicit confirmation. We take a random sample of
+4,261 patients from  the group of patients not progressing to diabetes so that we receive equal sample sizes. Again, this is done to reduce the bias of prediction 
+we have seen when viewing the results of the sensitivity, specificity, and confusion matrix of different machine learning algorithms.
 
 
 21. Incorporating Polygenic Risk Score
@@ -556,9 +566,65 @@ gzip -d for_nick_ethnic.txt.gz
 
 We then transferred the unzipped .txt file back to the Elemento_Research folder on the computer and imported it to jupyter notebook for incorporation into the model.
 
-22a. Results of Using Total Amount of Polygenic Risk Scores - Look at Notebook ""
+
+22a. Results of Using Total Amount of Polygenic Risk Scores - NEVER CREATED!!!!!!!!!!!!!
 
 In this notebook, we apply all polygenic risk scores for diabetic patients. We first merge the two polygenic risk score dataframes together and then run the analysis as usual.
+
+
+23. Comparing patients developing diabetes within different time periods to patients not developing diabetes - Look at notebooks 
+"Model 7.1 - Patients who progress to a diabetic state within 1 to 2 years.ipynb" and "Model 7.2 - Patients who progress to a diabetic state within 2 to 3 years.ipynb" and 
+"Model 7.3 - Patients who progress to a diabetic state within 3 to 4 years.ipynb" and "Model 7.4 - Patients who progress to a diabetic state within 4 to 5 years.ipynb" and 
+"Model 7.5 - Patients who progress to a diabetic state within 5 to 10 years.ipynb"
+
+In these notebooks, we run all the algorithms as in "Model 1 - All Models Matt Used Applied .ipynb" on the patients who develop diabetes within certain time periods after 
+being classified as prediabetic at the time when they attended the assessment center. The goal of this is to discover if there are certain features that are important to 
+the prediction of if a patient progresses to diabetes or not which are constant over time, or if there are changes in the types of features that become important for 
+patients who develop diabetes at a later date. We continuously see that HbA1c is almost always the most important predictor of diabetic progression.
+
+
+24. Comparing patients developing diabetes within certain time frames with patients developing diabetes within other certain time frames - Look at notebooks
+"Models 8.1-8.5 comparing patients developing diabetes within first year with other time periods.ipynb" and
+"Models 8.6-8.9 comparing patients developing diabetes within years 1 and 2 with other time periods.ipynb" and
+"Models 8.10-8.12 comparing patients developing diabetes within years 2 and 3 with other time periods.ipynb" and
+"Models 8.13-8.15 comparing patients developing diabetes within years 3 and 4 with other time periods and 4 to 5 years vs 5 to 10 years.ipynb"
+
+In these notebooks, we are comparing the patients who develop diabetes within certain years with other patients who develop diabetes within a different year. 
+The goal of this is similar to that of the 7.X models in that we want to discover which features are most important for developing diabetes during different time periods.
+However, these models typically encompass only small amount of patients for each cohort, and therefore their scores are not very high and the features should not be 
+interpreted as being confidently important to the prediction of the different time frames of developing diabetes patients. 
+
+
+25a. Attempting to Classify Unknown Patients Into Progressing to Diabetes or Not Progressing to Diabetes PART 1 Using KNN - Look at notebooks below in order:
+"Model 10 - K Nearest Neighbors Classifying Unknown Prediabetics to Diabetic Progression or Not.ipynb" and
+"Model 10 - Demographic and Other Information for Different Cohorts Comparing Known and Unknown Prediabetics.ipynb" and
+"Model 10 - Incorporating patients predicted to be prediabetic using KNN algorithm.ipynb" and
+"Model 10 - Showing KNN Model Does Not Work.ipynb"
+
+To attempt to classify the patients who are unknown to progress to diabetes or not, we create a K Nearest Neighbor Classifier in the first notebook. The reason for this was 
+because we believed that the patients who have scores which would be closely similar to the known patients who progress to diabetes or do not progress to diabetes would be 
+classified correctly themselves. By creating this model using the known patients, we then predicted the labels for the unknown patients. The model performed at its best for 
+K = 19 neighbors on a validation set of patients who are known to progress to diabetes or not. Therefore, we used this value to predict the labels for the unknown patients for 
+one of our models. This resulted in almost all patients being classified as progressing to diabetes. We believed that it may be better to use K = 1 neighbor instead because
+this means that each unknown patient is predicted based on the known patient he/she is closest to. This classified about 2200 patients as not progressing to diabetes. We 
+decided to use these patients to create a new model because this number of prediabetic patients is close to the actual number of prediabetic patients not progressing to diabetes
+that has been observed in studies of betwee 10-30% of the total - https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3891203/#:~:text=According%20to%20an%20ADA%20expert,prediabetes%20will%20eventually%20develop%20diabetes. 
+
+The second notebook in the list above shows the demographic information for the patient cohorts for both K = 19 and K = 1 neighbor.
+
+The third notebook contains the run of the model using the 742 known prediabetic patients not progressing to diabetes and the ~2200 patients predicted patients not to 
+progress to diabetes vs. the 4261 patients known to progress to diabetes. The results of this model are quite good, but still could be due to an imbalance of patient 
+size. Also, after talking with Dr. Elemento, he told me to validate that the KNN works well by using the unknown prediabetic patients and known diabetic progressing patients
+as training data and predicting on the known prediabetic patients that don't progress to diabetes.
+
+The fourth notebook predicts the labels for the known patients not progressing to diabetes using the unknown prediabetic patients and known diabetic progressing patients
+as training data. The results of this predictor show a very low accuracy and therefore disprove the assumption that the unknown patients do not progress to diabetes. We also
+showed that the 2200 patients we previously believed to be correctly classified not to progress to diabetes are also not good for predicting the true labels of the known 
+prediabetic patients not progressing to diabetes. Therefore, we must think of a new way to classify the 12000 patients who are unknown to progress to diabetes or not.
+
+25b. Attempting to Classify Unknown Patients Into Progressing to Diabetes or Not Progressing to Diabetes PART 2 Using ONLY Statistically Similar Patients - Look at notebooks
+
+
 
 
 
