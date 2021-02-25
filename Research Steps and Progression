@@ -198,7 +198,7 @@ This does take a long time for every file since they are so large.
 first_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_26867')
 
 We can look at the new number of features using the command below.
-less_features_first_step.shape
+first_step.shape
 
 The complete list of commands for all four files is shown below (includes the previous 3):
 first_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_26867')
@@ -622,9 +622,159 @@ as training data. The results of this predictor show a very low accuracy and the
 showed that the 2200 patients we previously believed to be correctly classified not to progress to diabetes are also not good for predicting the true labels of the known 
 prediabetic patients not progressing to diabetes. Therefore, we must think of a new way to classify the 12000 patients who are unknown to progress to diabetes or not.
 
-25b. Attempting to Classify Unknown Patients Into Progressing to Diabetes or Not Progressing to Diabetes PART 2 Using ONLY Statistically Similar Patients - Look at notebooks
+25b. Attempting to Classify Unknown Patients Into Progressing to Diabetes or Not Progressing to Diabetes PART 2 Using ONLY Statistically Similar Patients - Look at notebooks 
+"Model 10 - Failing to Find Statistical Difference Between Different Patient Groups"
+
+This method does not work. We end up finding that the two cohorts, those who are known not to progress to diabetes and those that are known to progress to diabetes are 
+extremely similar at the start of the study when their measurements are taken and they are classified as prediabetic.
 
 
+26. NEW DEVELOPMENT IN FINDING PREDIABETIC PATIENTS - Using the SCU to find more prediabetic patients
 
+After a discussion with Matt, he told me that there is an ICD code for prediabetic patients used, which is R73. We now want to incorporate these patients into our analysis.
+First, we need to do as we did in Step 3. above and download the epistart column and make sure we have all eid numbers from these patients. These steps are shown below.
+
+To import 'hesin_diag.txt':
+hesin_diag = pd.read_csv('/athena/elementolab/scratch/nib4003/ukbiobank/hesin/hesin_diag.txt', sep = '\t')
+
+To find all diabetes diagnosed patients:
+prediabetes_only = hesin_diag[hesin_diag['diag_icd10'].str.contains('R73',na = False)]
+
+To import 'hesin.txt'"
+hesin_txt = pd.read_csv('/athena/elementolab/scratch/nib4003/ukbiobank/hesin/hesin.txt', sep = '\t')
+
+Next we cut down the number of columns in order to have a merge of only the columns we need from 'hesin.txt'"
+hesin_txt_for_merge = hesin_txt[['eid', 'ins_index', 'epistart']]
+
+We merge the dataframes together by eid and ins_index to get the final result with the dates of diagnosis:
+patients_with_prediabetes_with_dates = prediabetes_only.merge(hesin_txt_for_merge, on = ['eid', 'ins_index'])
+
+Finally we have to save this dataframe as a csv to be exported to my computer so that we can use it to compare the dates in this file to the dates of the other file 
+in order to see if more patients in a prediabetic state progressed to a diabetic state:
+patients_with_prediabetes_with_dates.to_csv(path_or_buf = '~nib4003/for_winscp/patients_with_prediabetes_with_dates')
+
+* Notice how I have saved everything to a specific folder. I use this folder as a storage space to keep all files I move back and forth from my computer to the SCU
+using WinSCP. If operating on a Windows computer, YOU SHOULD DOWNLOAD WinSCP found here: https://winscp.net/eng/download.php 
+This tool makes transferring files from Windows to the SCU possible and very easy (drag and drop). 
+Once the two csv files we created in step 3 are moved to the computer, upload them to Jupyter Notebook (what I did).
+We then start the prediabetes classification and labeling of prediabetic patients who progressed to a diabetic state vs. those that never progressed to a diabetic state.
+
+
+27. Prediabetic classification part 2 - Look at Notebooks "Model 11, 12 - Prediabetes Classification With Prediabetes ICD"
+
+In this notebook, we repeated the analyses for the patients we already classified as known to progress to diabetes or not. We then performed the same analysis for the patients
+with ICD codes for prediabetes. We classified these patients as progressing to diabetes if they had a designated ICD column for diabetes (E11) epistart date later than that
+of the ICD column for prediabetes (R73). We also classified new patients who do not progress to diabetes. Since all the remaining patients were classified by medical 
+professionals as having prediabetes, we assume that they were more closely monitored after their diagnosis. Therefore, we can assume that these patients never developed
+diabetes, because if they did it would be recorded at a later date, as they were known to be susceptible. 
+
+
+28. Using the SCU to create a dataframe for all the remaining patients that contains all the features from the UKBiobank to be used for feature selection
+
+The next step is to make a classifier that contains many columns that we want to cut down using feature selection. 
+We first start by using Linux commands to create our 4 files that contain all the HTML features (whole_file26867, whole_file_33822, whole_file_41972, whole_file_42385). 
+We next need to combine all the features with the dataframe we created of all classified prediabetic patients so that the computation does not take a long time. 
+
+Import pandas first:
+import pandas as pd
+
+First, we import our prediabetic patient dataframe.
+all_prediabetes = pd.read_csv('for_winscp/prediabetic_all_possible_to_classify_WITH_PREDIABETIC_ICD_CODES_final')
+
+An additional column comes along with the above dataframe that we need to drop, shown below.
+all_prediabetes = all_prediabetes.drop(columns = ['Unnamed: 0'])
+
+Next we make a list of the eid values of the prediabetic patients at the start of the study.
+dfToList_all_prediabetes = all_prediabetes['eid'].tolist()
+
+Next we need to import the four large files with all the features. An example is shown below but we need to do this for all the files. 
+This does take a long time for every file since they are so large.
+first_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_26867')
+
+We can look at the new number of features using the command below.
+first_step.shape
+
+The complete list of commands for all four files is shown below (includes the previous 3):
+first_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_26867')
+first_step.shape
+second_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_33822')
+second_step.shape
+third_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_41972')
+third_step.shape
+fourth_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_42385')
+fourth_step.shape
+
+We then keep only the patients from the first_step dataframe that match our eid numbers for the prediabetic patients.
+first_step_only_prediabetics_at_start = first_step[first_step.eid.isin(dfToList_all_prediabetes)]
+
+Fianlly we merge all the files together to get one dataframe with all the features which only contains the patients which we are able to classify into developing diabetes or not. 
+The merge command is shown below.
+all_features_prediabetics_only = first_step_only_prediabetics_at_start.merge(second_step, on = 'eid').merge(third_step, on = 'eid').merge(fourth_step, on = 'eid')
+
+If we run all_features_prediabetes_only.shape we see that the shape is (6982, 12711) which is the number of patients we found and the total number of features.
+
+Now we finally have the whole dataframe with all the features for the prediabetic patients. 
+The next step is to save the dataframe as a csv, as we have done before, in order to send it back to the desktop using WinSCP.
+all_features_prediabetics_only.to_csv(path_or_buf = '~nib4003/for_winscp/all_features_prediabetics_only_WITH_PREDIABETIC_ICD_CODES')
+
+
+29. Comparing the Demographic Makeup of the New Cohorts Using prediabetic Patients With ICD Specification - 
+Look at notebook "Model 11, 12 - Demographic and Other Information for Different Cohorts"
+
+In this notebook, we compare the demographics between the group of prediabetic patients who do not progress to diabetes and those that do progress to diabetes. We have done 
+this same analysis before and are only repeating it for the new patients in our cohorts.
+
+
+30. Feature Selection for New Cohorts Incorporating Prediabetic ICD Codes - Look at Notebook "Model 11 - Finding All Features For Machine Learning"
+
+In this notebook, we repeat the procedures used previously to find the number of features that we want to keep from all features in total. The final number of features for
+the cohorts using the prediabetic ICD codes is 250 features. After creation of this model, we label the patients for exportation to new notebooks for model usage.
+
+
+31. Applying Machine Learning Algorithms Using the Features Found in the Notebook Above - Look at Notebook "Model 11 - All Models Matt Used Applied"
+
+In this notebook, we keep the original cohort sizes using the prediabetic ICD codes and run all 11 machine learning algorithms to receive new metrics and look at important
+features as we have done many times before. We receive very good metrics that do not seem as biased due to different class sizes like we see in previous models with less patients.
+
+
+32. Applying Features From Literature to Patients Cohorts Incorporating Prediabetic ICD Codes - Look at Notebook "Model 12 - All Models Matt Used Applied On Features From Literature"
+
+In this notebook, we take the features used in Model 2.1 and apply them to our new cohorts. Our results are better than model 2.1 and we find that the feature HbA1c
+accounts for an enormous amount of the preiction for the patients.
+
+
+33. Applying All Features From Notebook "Model 11 - Finding All Features For Machine Learning" to Equal Patient Cohort Sizes - 
+Look at Notebook "Model 13 - All Models Matt Used Applied With Equal Cohort Sizes"
+
+In this notebook, we repeated the steps of Model 11 but first took a random sample such that the cohort sizes were equal (n = 2322, due to addition of polygenic risk score).
+
+
+34. Applying Machine Learning Algorithms to Features From Literature ONLY Used in Cornell EHR - 
+Look at Notebook "Model 14 - Model For Features From Literature AND Cornell EHR Specific"
+
+In this notebook, we used on measurements from model 12 which are also found in the Cornell EHR data. The reason for this is because we hope to implement our model into the 
+Cornell EHR, which is less survey based than the UKBiobank, and so we keep primarily medical data features. This will allow us to make a more generalizable model for 
+different healthcare systems that may not have access to survey data.
+
+
+35. Applying ML Algorithms to All Features From "Model 11 - Finding All Features For Machine Learning" EXCEPT Hba1c and Glucose - 
+Look at Notebook "Model 15 - All Models Matt Used Applied Without Hba1c or Glucose"
+
+In this notebook, we use the same model as Model 11, but we cut out Hba1c and glucose. The reason for this is because these two features had a much greater feature importance
+for all algorithms we looked at than all other features. As a result, we wanted to see how much their absence would hinder the prediction power of the model. We find that, as 
+expected, the metrics all decrease, most substantialy the ROC AUC. 
+
+
+36. Adding Features to ML Algorithms One at a Time - Look at Notebook "Model 16 - Model For Features From Literature AND Cornell EHR Specific ONE BY ONE by Importance"
+
+In this notebook, we use the Linear SVM most important features from Model 11 to demonstrate the prediction power of the first few most important features from Model 11.
+We make five models, starting with HbA1c and adding the next most important feature for the next model. The five most important features are HbA1c, glucose, BMI, 
+Home area population density - urban or rural, and HDL Cholesterol. The results show that HbA1c has such a large impact on the prediction power of the model that the metrics
+received using a Lienar SVM or Logistic Regression model with only HbA1c are almost the same as with the addition of the other features. It is worth noting that the 
+specificity increases substantially with the addition of all 5 features as opposed to just HbA1c. Therefore, it is still important to add the other features so as to decrease
+the bias of the model cohort sizes.
+
+
+37. 
 
 
