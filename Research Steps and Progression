@@ -775,6 +775,14 @@ specificity increases substantially with the addition of all 5 features as oppos
 the bias of the model cohort sizes.
 
 
-37. 
+37. Creating Groups Based On Time Periods When Prediabetic Patients Who Progress to Diabetes Actually Progressed to Diabetic State -
+Look at Notebook "Model 17 - Finding All Prediabetic ICD Code Patients Who Progress To Diabetes Within Different Time Intervals"
+
+In this notebook, we create groups of all prediabetic patients who developed diabetes such that we have categories for those who develop diabetes within the first year of 
+prediabetic diagnosis, within year one and year two, within year two and year three, within year three and year four, within year 
+
+
+38. Attempting to Show Feature Differences Between Patients Who Develop Diabetes Within Different Time Periods Using Linear SVM - 
+Look at Notebook "Model 17 - Looking At HbA1c Comparisons Over Years"
 
 
