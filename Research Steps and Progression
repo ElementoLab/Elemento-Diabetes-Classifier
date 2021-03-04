@@ -779,10 +779,70 @@ the bias of the model cohort sizes.
 Look at Notebook "Model 17 - Finding All Prediabetic ICD Code Patients Who Progress To Diabetes Within Different Time Intervals"
 
 In this notebook, we create groups of all prediabetic patients who developed diabetes such that we have categories for those who develop diabetes within the first year of 
-prediabetic diagnosis, within year one and year two, within year two and year three, within year three and year four, within year 
+prediabetic diagnosis, within year one and year two, within year two and year three, within year three and year four, within year four and year five, and within year five and ten.
 
 
 38. Attempting to Show Feature Differences Between Patients Who Develop Diabetes Within Different Time Periods Using Linear SVM - 
-Look at Notebook "Model 17 - Looking At HbA1c Comparisons Over Years"
+Look at Notebook "Model 17 - Looking At HbA1c Comparisons Over Years" 
+
+In this notebook, we run the linear SVM model for prediabetic patients developing diabetes within the first year of being prediabetic diagnosed vs. prediabetic patients 
+developing diabetes within year one and year two of being prediabetic diagnosed. The results of this are about as good as a random classifier, which means that the prediction
+power of the model is very low. Originally I thought this was due to the fact that the cohort sizes in this comparison are very small.
+
+We therefore ran a model comparing the patients who develop diabetes within the first 5 years of prediabetic classification vs. the patients who develop diabetes between years
+5 and 10 after predibetic classification. This gives us larger sample sizes. However, we find that the classifier once again cannot distinguish between the two groups. 
+Therefore, we have discovered that at the time of the medical measurements, the patients who develop diabetes are not easily distinguishable. We also attempted to use only the 
+few most important features from this model since we believed that one reason for the low prediction power of the model could be due to other features just being a large 
+source of noise. We found that this is not the case and that even just using the most important features did not increase the model metrics.
 
 
+39. NEW CHANGE IN FINDING PREDIABETIC PATIENTS - Classifying the New Patient Cohort of Prediabetic Patiens Using ICD Codes - 
+Look at Notebook "Model 21, 22  - Prediabetes Classification With Prediabetes ICD Taking Into Account Epistart Before Assessment Center Date"
+
+We realized that in all models from 11 - 17, we kept all prediabetic patients who were diagnosed with prediabetes. This is a problem because that means that some were NOT
+prediabetic when their measurements were taken at the assessment center. This resulted in many patients who were healthy when their data was taken, not classified as prediabetic.
+That is why our metrics were so much better for these models. There was a greater difference between patient data due to the use of healthy patient data outside the realm of 
+our study. To solve this problem, we only keep the patients who were diagnosed with prediabetes with an ICD code before the date they attended the assessment center. 
+Unfortunately, this results in a great drop of patients added to the cohorts from 2486 to 497 total patients. 
+
+In this notebook, we find all patients who are truly prediabetic when their measurements are taken and can be used in the study. 
+
+
+40. We use the new patient groups to run all models as usual - Look at Notebook "Model 21 - All Models Matt Used Applied"
+
+In this notebook, we again repeat the same procedures from Models 1 and 11 in which we use all features from the UKBiobank and after feature selection we run 11 machine learning
+algorithms to find metrics of interest. Since our patient cohorts are largely imbalanced, the information is not too valid I believe because the model learns to classify more
+patients based on the greater sized cohort of patients developing diabetes. Therefore, we make another model with equal cohort sizes.
+
+
+41. Comparing the Demographic Makeup of the New Cohorts Using prediabetic Patients With ICD Specification - 
+Look at notebook "Model 21 - Demographic and Other Information for Different Cohorts"
+
+In this notebook, we compare the demographics between the group of prediabetic patients who do not progress to diabetes and those that do progress to diabetes. We have done 
+this same analysis before and are only repeating it for the new patients in our cohorts. 
+
+
+42. Applying All Features From Notebook "Model 21 - Finding All Features For Machine Learning" to Equal Patient Cohort Sizes - 
+Look at Notebook "Model 23 - All Models Matt Used Applied With Equal Cohort Sizes"
+
+In this notebook, we repeated the steps of Model 11 but first took a random sample such that the cohort sizes were equal (n = 960, due to addition of polygenic risk score).
+
+
+43. Applying Machine Learning Algorithms to Features From Literature ONLY Used in Cornell EHR - 
+Look at Notebook "Model 24 - Model For Features From Literature AND Cornell EHR Specific"
+
+In this notebook, we used the same measurements from model 14 which are also found in the Cornell EHR data. The reason for this is because we hope to implement our model into the 
+Cornell EHR, which is less survey based than the UKBiobank, and so we keep primarily medical data features. This will allow us to make a more generalizable model for 
+different healthcare systems that may not have access to survey data.
+
+
+44. Adding Features to ML Algorithms One at a Time - Look at Notebook "Model 26 - Model For Features From Literature AND Cornell EHR Specific ONE BY ONE by Importance"
+
+In this notebook, we use the Linear SVM most important features from Model 11 to demonstrate the prediction power of the first few most important features from Model 11.
+We make five models, starting with HbA1c and adding the next most important feature for the next model. The five most important features are HbA1c, BMI, glucose, Triglycerides, 
+and Home area population density - urban or rural. The results show that HbA1c has the largest impact on the prediction power of the model. The addition of the other features
+result in better metrics, especially sensitivity and specificity, as they are added. However, it is clear that the model performs similarly after the addition of 3 or 4 features.
+
+
+37. Creating Groups Based On Time Periods When Prediabetic Patients Who Progress to Diabetes Actually Progressed to Diabetic State -
+Look at Notebook "Model 27 - Finding All Prediabetic ICD Code Patients Who Progress To Diabetes Within Different Time Intervals"
