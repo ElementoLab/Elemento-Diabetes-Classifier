@@ -843,6 +843,9 @@ We make five models, starting with HbA1c and adding the next most important feat
 and Home area population density - urban or rural. The results show that HbA1c has the largest impact on the prediction power of the model. The addition of the other features
 result in better metrics, especially sensitivity and specificity, as they are added. However, it is clear that the model performs similarly after the addition of 3 or 4 features.
 
+Also, we ran the model only using the polygenic risk score, which resulted in ROC AUC scores of that of a random classifier (0.50). Therefore, we showed that the polygenic
+risk score is not impactful on the classification of the prediabetic patients, which has been hinted by other models since this feature has not been in the top few when we 
+have looked at previous models that incorporate it. 
 
 37. Creating Groups Based On Time Periods When Prediabetic Patients Who Progress to Diabetes Actually Progressed to Diabetic State -
 Look at Notebook "Model 27 - Finding All Prediabetic ICD Code Patients Who Progress To Diabetes Within Different Time Intervals"
