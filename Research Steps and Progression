@@ -185,7 +185,7 @@ The next step is to make a classifier that contains many columns that we want to
 We first start by using Linux commands to create our 4 files that contain all the HTML features (whole_file26867, whole_file_33822, whole_file_41972, whole_file_42385). 
 We next need to combine all the features with the dataframe we created of all classified prediabetic patients so that the computation does not take a long time. 
 First, we import our prediabetic patient dataframe.
-all_prediabetes = pd.read_csv('for_winscp/prediabetic_all_possible_to_classify_final')
+all_prediabetes = pd.read_csv('/home/nib4003/for_winscp/prediabetic_all_possible_to_classify_final')
 
 An additional column comes along with the above dataframe that we need to drop, shown below.
 all_prediabetes = all_prediabetes.drop(columns = ['Unnamed: 0'])
@@ -679,7 +679,7 @@ Import pandas first:
 import pandas as pd
 
 First, we import our prediabetic patient dataframe.
-all_prediabetes = pd.read_csv('for_winscp/prediabetic_all_possible_to_classify_WITH_PREDIABETIC_ICD_CODES_final')
+all_prediabetes = pd.read_csv('/home/nib4003/for_winscp/prediabetic_all_possible_to_classify_WITH_PREDIABETIC_ICD_CODES_final')
 
 An additional column comes along with the above dataframe that we need to drop, shown below.
 all_prediabetes = all_prediabetes.drop(columns = ['Unnamed: 0'])
@@ -849,3 +849,69 @@ have looked at previous models that incorporate it.
 
 37. Creating Groups Based On Time Periods When Prediabetic Patients Who Progress to Diabetes Actually Progressed to Diabetic State -
 Look at Notebook "Model 27 - Finding All Prediabetic ICD Code Patients Who Progress To Diabetes Within Different Time Intervals"
+
+
+38. Model that does not incoporate polygenic risk score but does incorporate all other features - Look at notebook "Model 25 - Same as Model 21 but Without Polygenic Risk Score"
+
+In this notebook, we run the same models, using the same patients, as Model 21, with the exception that we do not include the polygenic risk score. We want to see if this 
+influences the model metrics in any way. It does not seem that it does. Therefore, the polygenic risk score does not influence the prediction of the prediabetic patients 
+progressing or not progressing to diabetes. We have already hinted at this, but it is better to definitively compare two models which exactly the same features except for the 
+addition of the polygenic risk score.
+
+
+39. Incorporating Family History By Adding two Features for if a Patient's Mother or Father Had Diabetes - 
+Look at Notebook "Model 27 - Same as Model 24 but adding Mother and Father History of Diabetes and Performs Slightly Worse"
+
+In this notebook, we add two features to Model 24 which correspond to a column of 0's (patient's mother/father did not have diabetes) and 1's (patient's mother/father did have
+diabetes). We suspected this would have a positive influence on the prediction power of the model. However, it seemed to decrease the metrics of all the models, just adding 
+extra noise. 
+
+
+40. Attempting to Classify More Unknown Prediabetic Patients Using Scott's Idea To Find Out Which Patients Were Diagnosed With Other Diseases Who We Classified As Prediabetic to 
+Begin the Study - Using the SCU to get the epistart dates of all unknown patients
+
+We begin in the SCU again. We follow the steps below to incorporate the ICD codes for all unknown patients. The assumption is that if patients are diagnosed with other diseases
+who we have classified as prediabetic, then this is a sign that they are still prediabetic because otherwise they would be diagnosed with diabetes along with the other diseases.
+This tells us which patients "drop off the grid" as well and do not get checked up on in our unknown patient group. It is our hope that we can identify patients who we know 
+do not progress to diabetes in the unknown group because they are still being checked up on by medical professionals who have not diagnosed them with diabetes. Therefore, we 
+will assume that patients who are diagnosed with diseases other than diabetes towards the years close to 2021 will not have progressed to diabetes because they are still actively
+being seen by the doctor and they do not have a diabetic ICD code diagnosis. 
+
+First, we import the dataframe from Model 3 which contains the unknown diagnosed patients.
+all_prediabetes = pd.read_csv('/home/nib4003/for_winscp/prediabetic_all_possible_to_classify_keeping_all_prediabetic_patients_final')
+
+Next, we create a list of these patients:
+dfToList_all_prediabetes = all_prediabetes['eid'].tolist()
+
+To import 'hesin_diag.txt':
+hesin_diag = pd.read_csv('/athena/elementolab/scratch/nib4003/ukbiobank/hesin/hesin_diag.txt', sep = '\t')
+
+To import 'hesin.txt':
+hesin_txt = pd.read_csv('/athena/elementolab/scratch/nib4003/ukbiobank/hesin/hesin.txt', sep = '\t')
+
+Next we cut down the number of columns in order to have a merge of only the columns we need from 'hesin.txt'"
+hesin_txt_for_merge = hesin_txt[['eid', 'ins_index', 'epistart']]
+
+Next, we keep only these patients in the hesin_diag dataframe:
+hesin_txt_for_merge_prediabetics = hesin_txt_for_merge[hesin_txt_for_merge.eid.isin(dfToList_all_prediabetes)]
+
+We merge the dataframes together by eid and ins_index to get the final result with the dates of diagnosis:
+patients_with_prediabetes_with_dates = hesin_txt_for_merge_prediabetics.merge(hesin_txt_for_merge, on = ['eid', 'ins_index'])
+
+Showing the dimensions of the dataframe. The following code should result in the output of (727735, 4):
+patients_with_prediabetes_with_dates.shape
+
+Finally we have to save this dataframe as a csv to be exported to my computer so that we can use it to compare the dates in this file to the dates of the other file 
+in order to see if more patients in a prediabetic state progressed to a diabetic state:
+patients_with_prediabeties_with_dates.to_csv(path_or_buf = '~nib4003/for_winscp/icd_codes_and_epistart_dates_to_try_to_classify_unknown_patients')
+
+
+41. Classifying more of the unknown patients - Look at Notebook "Attempting to classify unknown prediabetic patients using icd codes assumption"
+
+In this notebook, we make the assumption that patients who are diagnosed with a disease after 2018, which is about 10 years after the average time when patients had their data
+taken at the beginning of the study, can be classified as not developing diabetes because these patients are being looked at by doctors and therefore if they had developed 
+diabetes, it is most likely that they would be given an ICD code for diabetes since they received an ICD code for another disease. This results in the addition of 4513 patients
+who were originally classified as prediabetic who do not develop to diabetes. 
+
+
+42. 
