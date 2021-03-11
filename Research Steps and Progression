@@ -906,12 +906,71 @@ in order to see if more patients in a prediabetic state progressed to a diabetic
 patients_with_prediabeties_with_dates.to_csv(path_or_buf = '~nib4003/for_winscp/icd_codes_and_epistart_dates_to_try_to_classify_unknown_patients')
 
 
-41. Classifying more of the unknown patients - Look at Notebook "Attempting to classify unknown prediabetic patients using icd codes assumption"
+41. Classifying more of the unknown patients - 
+Look at Notebook "Model 34 and Model 34.1 - Attempting to classify unknown prediabetic patients using icd codes assumption AND Running Models With Cornell EHR Features"
 
 In this notebook, we make the assumption that patients who are diagnosed with a disease after 2018, which is about 10 years after the average time when patients had their data
 taken at the beginning of the study, can be classified as not developing diabetes because these patients are being looked at by doctors and therefore if they had developed 
 diabetes, it is most likely that they would be given an ICD code for diabetes since they received an ICD code for another disease. This results in the addition of 4513 patients
 who were originally classified as prediabetic who do not develop to diabetes. 
 
+We then label these prediabetic patients as not progressing to diabetes and add them to the patients used for Model 21. We then run the model using the features from Model 24.
+One thing we find is that if we do not shuffle the rows, the stratified Kfold cross validation results in 8 of the 10 groups obtaining great results, but the last 2 groups 
+have metrics that are much lower than the other 8. Therefore, we shuffle the rows in the dataframe before running the model to fix this. Our results after shuffling are 
+extremely high and the best performance of any model yet. 
 
-42. 
+We also save the final dataframe after combining the new patients with the old patients with their eid and target columns only. This will be used to get the features for 
+Model 31 first getting all the features from the SCU below.
+
+
+42. Using the SCU to Make Dataframe With All Features For New Patients From Model 34 - Using SCU
+
+We repeat the same process as in step 5 above exactly except we just change the name of the file we read in and file we save at the end.
+
+First, we import our prediabetic patient dataframe.
+all_prediabetes = pd.read_csv('/home/nib4003/for_winscp/prediabetic_patients_with_additional_4513_patients_from_unknown_patients_who_have_ICD_code_since_2018')
+
+An additional column comes along with the above dataframe that we need to drop, shown below.
+all_prediabetes = all_prediabetes.drop(columns = ['Unnamed: 0'])
+
+Next we make a list of the eid values of the prediabetic patients at the start of the study.
+dfToList_all_prediabetes = all_prediabetes['eid'].tolist()
+
+Next we need to import the four large files with all the features. An example is shown below but we need to do this for all the files. 
+This does take a long time for every file since they are so large.
+first_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_26867')
+
+We can look at the new number of features using the command below.
+first_step.shape
+
+The complete list of commands for all four files is shown below (includes the previous 3):
+first_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_26867')
+first_step.shape
+second_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_33822')
+second_step.shape
+third_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_41972')
+third_step.shape
+fourth_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_42385')
+fourth_step.shape
+
+We then keep only the patients from the first_step dataframe that match our eid numbers for the prediabetic patients.
+first_step_only_prediabetics_at_start = first_step[first_step.eid.isin(dfToList_all_prediabetes)]
+
+Fianlly we merge all the files together to get one dataframe with all the features which only contains the patients which we are able to classify into developing diabetes or not. The merge command is shown below.
+all_features_prediabetics_only = first_step_only_prediabetics_at_start.merge(second_step, on = 'eid').merge(third_step, on = 'eid').merge(fourth_step, on = 'eid')
+
+If we run all_features_prediabetes_only.shape we see that the shape is (5003, 12711) which is the number of patients we found and the total number of features.
+
+Now we finally have the whole dataframe with all the features for the prediabetic patients. 
+The next step is to save the dataframe as a csv, as we have done before, in order to send it back to the desktop using WinSCP.
+all_features_prediabetics_only.to_csv(path_or_buf = '~nib4003/for_winscp/all_features_prediabetic_patients_with_additional_4513_patients_from_unknown_patients_who_have_ICD_code_since_2018')
+
+
+43. Creation of a Model Starting With All Features From SCU - 
+Look at Notebook "Model 31 - Machine Learning Start Using Model With All Features With 4513 Extra Unknown Patients Not Progress to Diabetes"
+
+In this notebook, we import the dataframe from the SCU with all the features for our current patients used in the model. We then go through the same process as Model 1, 11, and
+21 in which we find all features we want to keep in the dataframe specifically for these patients. We then run all models like usual.
+
+
+44. 
