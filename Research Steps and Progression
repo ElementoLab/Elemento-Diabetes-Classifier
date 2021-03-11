@@ -959,7 +959,7 @@ first_step_only_prediabetics_at_start = first_step[first_step.eid.isin(dfToList_
 Fianlly we merge all the files together to get one dataframe with all the features which only contains the patients which we are able to classify into developing diabetes or not. The merge command is shown below.
 all_features_prediabetics_only = first_step_only_prediabetics_at_start.merge(second_step, on = 'eid').merge(third_step, on = 'eid').merge(fourth_step, on = 'eid')
 
-If we run all_features_prediabetes_only.shape we see that the shape is (5003, 12711) which is the number of patients we found and the total number of features.
+If we run all_features_prediabetics_only.shape we see that the shape is (9944, 12711) which is the number of patients we found and the total number of features.
 
 Now we finally have the whole dataframe with all the features for the prediabetic patients. 
 The next step is to save the dataframe as a csv, as we have done before, in order to send it back to the desktop using WinSCP.
