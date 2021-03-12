@@ -907,7 +907,7 @@ patients_with_prediabeties_with_dates.to_csv(path_or_buf = '~nib4003/for_winscp/
 
 
 41. Classifying more of the unknown patients - 
-Look at Notebook "Model 34 and Model 34.1 - Attempting to classify unknown prediabetic patients using icd codes assumption AND Running Models With Cornell EHR Features"
+Look at Notebook "Model 31 patients with incorrect Model 34 and Model 34.1 Prob - Attempting to classify unknown prediabetic patients using icd codes assumption AND showing need for using shuffle"
 
 In this notebook, we make the assumption that patients who are diagnosed with a disease after 2018, which is about 10 years after the average time when patients had their data
 taken at the beginning of the study, can be classified as not developing diabetes because these patients are being looked at by doctors and therefore if they had developed 
@@ -916,7 +916,9 @@ who were originally classified as prediabetic who do not develop to diabetes.
 
 We then label these prediabetic patients as not progressing to diabetes and add them to the patients used for Model 21. We then run the model using the features from Model 24.
 One thing we find is that if we do not shuffle the rows, the stratified Kfold cross validation results in 8 of the 10 groups obtaining great results, but the last 2 groups 
-have metrics that are much lower than the other 8. Therefore, we shuffle the rows in the dataframe before running the model to fix this. Our results after shuffling are 
+have metrics that are much lower than the other 8. The reason for this is because the patients are ordered such that when the folds in stratified kfold cross validation are made,
+only patients not progressing to diabetes (target 0) are taken. As a result, the classifier predicts all these patients correctly. When data is added that has diabetic patients,
+the model performs much worse due to this initial bias. Therefore, we shuffle the rows in the dataframe before running the model to fix this. Our results after shuffling are 
 extremely high and the best performance of any model yet. 
 
 We also save the final dataframe after combining the new patients with the old patients with their eid and target columns only. This will be used to get the features for 
@@ -970,7 +972,24 @@ all_features_prediabetics_only.to_csv(path_or_buf = '~nib4003/for_winscp/all_fea
 Look at Notebook "Model 31 - Machine Learning Start Using Model With All Features With 4513 Extra Unknown Patients Not Progress to Diabetes"
 
 In this notebook, we import the dataframe from the SCU with all the features for our current patients used in the model. We then go through the same process as Model 1, 11, and
-21 in which we find all features we want to keep in the dataframe specifically for these patients. We then run all models like usual.
+21 in which we find all features we want to keep in the dataframe specifically for these patients. We then run all models like usual. We end up with 209 features (including 
+the polygenic risk score) and 513 columns after one hot encoding. 
 
 
-44. 
+44. Creating Cohorts for Model 31 - Look at Notebook "Model 31 - Demographic and Other Information for Different Cohorts.ipynb"
+
+In this notebook, we perform statistical t tests for some features between the different cohorts of Model 31. 
+
+
+45. Creation of CORRECT Models With Cornell EHR Features Using Patient Cohorts From Model 31 and Equal Sized Cohorts Of These Patients - Look at Notebook
+"Model 34 and Model 34.1 - Model For Features From Literature AND Cornell EHR Specific ALSO WITH EQUAL COHORT SIZES (also shows effect of coding rural and urban feature at bottom)"
+
+In this notebook, we create models using only the Cornell EHR features from literature from Model 24. Our performance is around a 0.75 ROC AUC and the linear models perform
+just as well as the other models for most metrics. This is a good sign for interpretability. 
+
+We also encode the Home area population density - urban or rural feature which we have not done before, and the results are very similar to those of the other dataframe, with 
+no reason to suspect either way influences the model. However, what does change is that since we are spreading out the values from the feature into multiple different columns,
+the importance of each column is much less than that of the total feature without coding it. Therefore, I think it is better not to code it when incorporating it into our model.
+
+
+46. 
