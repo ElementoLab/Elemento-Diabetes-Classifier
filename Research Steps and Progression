@@ -978,7 +978,8 @@ the polygenic risk score) and 513 columns after one hot encoding.
 
 44. Creating Cohorts for Model 31 - Look at Notebook "Model 31 - Demographic and Other Information for Different Cohorts.ipynb"
 
-In this notebook, we perform statistical t tests for some features between the different cohorts of Model 31. 
+In this notebook, we perform statistical t tests for some features between the different cohorts of Model 31. We also look at how many patients die in both cohorts for a 
+cox regression model and other statistics.
 
 
 45. Creation of CORRECT Models With Cornell EHR Features Using Patient Cohorts From Model 31 and Equal Sized Cohorts Of These Patients - Look at Notebook
@@ -992,4 +993,80 @@ no reason to suspect either way influences the model. However, what does change 
 the importance of each column is much less than that of the total feature without coding it. Therefore, I think it is better not to code it when incorporating it into our model.
 
 
-46. 
+46. Looking at Features From Model 34 One By One - Look at Notebook "Model 36 - Model For Features From Literature AND Cornell EHR Specific ONE BY ONE by Importance From Model 34"
+
+In this notebook, we look at the top 5 features from Model 34 Linear SVM and see how they perform when the only features of the model. We see that the results are a little 
+worse than Model 31 and 34 but not by much.
+
+
+47. Creation of Model Using Only Exercise and Diet Features - Look at Notebook "Model 41 - Same cohorts as Model 31 only using exercise and diet features"
+
+In this notebook, we want to see if exercise and diet can solely predict the patients progressing to diabetes or not. After selecting for features without many NaN values,
+we end with a model with 32 features. The results are that there is a small signal, but not much. 
+Therefore, we conclude that these features do have a small influence on the model, but are not the most important features. 
+
+
+48. Showing KNN and KMeans Cannot Cluster Patients For Prediction of Progression to Diabetes or Not - Look at Notebook 
+"Model 31 - Showing KNN and KMeans does not work for using ICD codes only patients not progressing and progressing to diabetes"
+
+Here we use 246 patients we know don't progress to diabetes using ICD codes for prediabetes and 246 patients we know do progress to diabetes using ICD codes for diabetes
+and test on the 742 patients from Model 1 who do not progress to diabetes. We find that when using both algorithms, the accuracy of predication of the 742 patients is very 
+low and therefore these methods do not work.
+
+
+49. Showing Median Values For Patient Cohorts - Look at Notebook 
+"Model 31 and 41 - Demographic and Other Information for Different Cohorts USING MEDIAN showing prs distributions for cohorts are extremely similar"
+
+In this notebook, we compare the cohorts of Model 31 (and thus 41) by median values instead of mean. This shows that the values for polygenic risk score are much closer than
+we previously thought using the mean only. 
+
+
+50. Looking at Most Important Features From Model 41 One By One - Look at Notebook 
+"Model 46 - Model For Features From Literature AND Cornell EHR Specific ONE BY ONE by Importance From Model 41"
+
+In this notebook, we look at the most important features from Model 41. This shows that all features in model 41 have similar importances (i.e. none of them stand out among 
+the rest). Therefore, to get the strongest signal, we need almost all 32 features. 
+
+
+51. Creation of Model Without 742 Original Patients Defined to NOT Progress to Diabetes - Look at Notebook
+"Model 51 - Same as Model 31 but without original 742 patients progressing to diabetes - shows they are necessary in model"
+
+In this notebook, we use the cohorts of model 31 and cut out all 742 originally defined patients from Model 1 to not progress to diabetes. The reason for this is because in the 
+notebook "Model 31 - Showing KNN and KMeans does not work for using ICD codes only patients not progressing and progressing to diabetes" our predictions for these values are 
+not good. Therefore, it is wise to check if these patients actually are representative of the population and help the prediction power of the model. We find that the results
+have a better specificity and sensitivity when these patients are included and therefore we need these patients in the model.
+
+
+52. Creation of Model Without 742 Original Patients Defined to NOT Progress to Diabetes Using Only Cornell EHR Features - Look at Notebook
+"Model 54 - Same cohorts as Model 51 but only with Cornell EHR features"
+
+In this notebook, we look at the same cohorts as in Model 51 but only looking at the Cornell EHR features. We get the same result that we need to keep these 742 patients to get
+the best results and therefore they are representative of the patients not progressing to diabetes population.
+
+
+53. Using the SCU to Get All Women Who Develop Gestational Diabetes and the Dates When This Occurred
+
+To find all patients with gestational diabetes, we need to look at the hesin files again. For gestational diabetes developed during pregnancy, the ICD codes are O244 and O 249.
+
+To import 'hesin_diag.txt':
+hesin_diag = pd.read_csv('/athena/elementolab/scratch/nib4003/ukbiobank/hesin/hesin_diag.txt', sep = '\t')
+
+To find all diabetes diagnosed patients:
+gestational_diabetes_only = hesin_diag[hesin_diag['diag_icd10'].str.contains('O244|O249',na = False)]
+
+To import 'hesin.txt'"
+hesin_txt = pd.read_csv('/athena/elementolab/scratch/nib4003/ukbiobank/hesin/hesin.txt', sep = '\t')
+
+Next we cut down the number of columns in order to have a merge of only the columns we need from 'hesin.txt'"
+hesin_txt_for_merge = hesin_txt[['eid', 'ins_index', 'epistart']]
+
+We merge the dataframes together by eid and ins_index to get the final result with the dates of diagnosis:
+patients_with_gestational_diabetes_with_dates = gestational_diabetes_only.merge(hesin_txt_for_merge, on = ['eid', 'ins_index'])
+
+Finally we have to save this dataframe as a csv to be exported to my computer so that we can use it to compare the dates in this file to the dates of the other file 
+in order to see if more patients in a prediabetic state progressed to a diabetic state:
+patients_with_gestational_diabetes_with_dates.to_csv(path_or_buf = '~nib4003/for_winscp/patients_with_gestational_diabetes_with_dates')
+
+
+54. Finding All Patients Who Have Gestational Diabetes Before Attending the Assessment Center and Pregnant Women Not Developing Gestational Diabetes - Look at Notebook
+"
