@@ -929,6 +929,24 @@ Model 31 first getting all the features from the SCU below.
 
 We repeat the same process as in step 5 above exactly except we just change the name of the file we read in and file we save at the end.
 
+Load python 3.7.0:
+spack load -r python@3.7.0^gcc@6.3.0
+
+Shows that python is loaded:
+echo $LOADEDMODULES | sed "s/:/\n/g" | sort
+
+Load pandas for use in python:
+spack load -r py-pandas
+
+Do not need to run this line of code but it shows that pandas is downloaded now:
+echo $LOADEDMODULES | sed "s/:/\n/g" | sort
+
+To open python (very simple):
+python
+
+Now we can import pandas as usual in the newly opened python file:
+import pandas as pd
+
 First, we import our prediabetic patient dataframe.
 all_prediabetes = pd.read_csv('/home/nib4003/for_winscp/prediabetic_patients_with_additional_4513_patients_from_unknown_patients_who_have_ICD_code_since_2018')
 
@@ -1044,9 +1062,27 @@ In this notebook, we look at the same cohorts as in Model 51 but only looking at
 the best results and therefore they are representative of the patients not progressing to diabetes population.
 
 
-53. Using the SCU to Get All Women Who Develop Gestational Diabetes and the Dates When This Occurred
+53. Using the SCU to Get All Women Who Develop Gestational Diabetes and the Dates When This Occurred, All Women Who Are Pregnant In The Study, 
 
 To find all patients with gestational diabetes, we need to look at the hesin files again. For gestational diabetes developed during pregnancy, the ICD codes are O244 and O 249.
+
+Load python 3.7.0:
+spack load -r python@3.7.0^gcc@6.3.0
+
+Shows that python is loaded:
+echo $LOADEDMODULES | sed "s/:/\n/g" | sort
+
+Load pandas for use in python:
+spack load -r py-pandas
+
+Do not need to run this line of code but it shows that pandas is downloaded now:
+echo $LOADEDMODULES | sed "s/:/\n/g" | sort
+
+To open python (very simple):
+python
+
+To import pandas:
+import pandas as pd
 
 To import 'hesin_diag.txt':
 hesin_diag = pd.read_csv('/athena/elementolab/scratch/nib4003/ukbiobank/hesin/hesin_diag.txt', sep = '\t')
@@ -1063,10 +1099,101 @@ hesin_txt_for_merge = hesin_txt[['eid', 'ins_index', 'epistart']]
 We merge the dataframes together by eid and ins_index to get the final result with the dates of diagnosis:
 patients_with_gestational_diabetes_with_dates = gestational_diabetes_only.merge(hesin_txt_for_merge, on = ['eid', 'ins_index'])
 
-Finally we have to save this dataframe as a csv to be exported to my computer so that we can use it to compare the dates in this file to the dates of the other file 
-in order to see if more patients in a prediabetic state progressed to a diabetic state:
-patients_with_gestational_diabetes_with_dates.to_csv(path_or_buf = '~nib4003/for_winscp/patients_with_gestational_diabetes_with_dates')
+NOW WE CREATE A DATAFRAME FOR ALL THE FEATURES FOR ALL PATIENTS WHO ARE HAVE GESTATIONAL DIABETES:
+
+Next we make a list of the eid values of the prediabetic patients at the start of the study.
+dfToList_patients_with_gestational_diabetes_with_dates = patients_with_gestational_diabetes_with_dates['eid'].tolist()
+
+The complete list of commands for all four files is shown below (includes the previous 3):
+first_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_26867')
+first_step.shape
+second_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_33822')
+second_step.shape
+third_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_41972')
+third_step.shape
+fourth_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_42385')
+fourth_step.shape
+
+We then keep only the patients from the first_step dataframe that match our eid numbers for the prediabetic patients.
+first_step_only_gestational_diabetes = first_step[first_step.eid.isin(dfToList_patients_with_gestational_diabetes_with_dates)]
+
+Fianlly we merge all the files together to get one dataframe with all the features which only contains the patients which we are able to classify into developing diabetes or not. The merge command is shown below.
+all_features_gestational_diabetes = first_step_only_gestational_diabetes.merge(second_step, on = 'eid').merge(third_step, on = 'eid').merge(fourth_step, on = 'eid')
+
+If we run all_features_gestational_diabetes.shape we see that the shape is (255, 12711) which is the number of patients we found and the total number of features.
+
+Now we finally have the whole dataframe with all the features for the prediabetic patients. 
+The next step is to save the dataframe as a csv, as we have done before, in order to send it back to the desktop using WinSCP.
+all_features_gestational_diabetes.to_csv(path_or_buf = '~nib4003/for_winscp/all_features_gestational_diabetes')
+
+NOW WE CREATE A DATAFRAME FOR THE FEATURES WE NEED TO FIND WOMEN WHO ARE PREGNANT AFTER ATTENDING THE ASSESSMENT CENTER:
+
+The columns we need are below:
+
+21003-0.0 : Age when attended assessment centre
+2754-0.0, 2754-1.0, 2754-2.0 : Age at first live birth
+2764-0.0, 2764-1.0, 2764-2.0 : Age at last live birth
+Using these two columns, we can find all women who were pregnant after taking their measurements at the assessment center, i.e. patients having an age at last live birth 
+greater than that of the age when attended assessment center.
+
+We would again need to create the dataframes containing all features from the csv files:
+first_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_26867')
+second_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_33822')
+
+Then we merge these dataframes:
+all_features_gestational_diabetes = first_step.merge(second_step, on = 'eid')
+
+Finally, we keep only the columns that are necessary to find the patients who were pregnant after the assessment center date.
+gestational_diabetes_for_pregnancy_discovery = all_features_gestational_diabetes[['eid', '21003-0.0', '2764-0.0', ']]
+
+patients_pregnant_after_assessment_center_date = gestational_diabetes_for_pregnancy_discovery[(gestational_diabetes_for_pregnancy_discovery['2764-0.0'] > 
+gestational_diabetes_for_pregnancy_discovery['21003-0.0']) | 
+(gestational_diabetes_for_pregnancy_discovery['2764-1.0'] > gestational_diabetes_for_pregnancy_discovery['21003-0.0']) | 
+(gestational_diabetes_for_pregnancy_discovery['2764-2.0'] > gestational_diabetes_for_pregnancy_discovery['21003-0.0']) | 
+(gestational_diabetes_for_pregnancy_discovery['2754-0.0'] > gestational_diabetes_for_pregnancy_discovery['21003-0.0']) | 
+(gestational_diabetes_for_pregnancy_discovery['2754-1.0'] > gestational_diabetes_for_pregnancy_discovery['21003-0.0']) | 
+(gestational_diabetes_for_pregnancy_discovery['2754-2.0'] > gestational_diabetes_for_pregnancy_discovery['21003-0.0'])]
+
+This results in 29 patients. We can then create a dataframe with all features for these patients using the commands below.
+
+First we read in the other 2 csv files with the features from the UKBiobank.
+third_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_41972')
+fourth_step = pd.read_csv('/athena/elementolab/scratch/nib4003/documentation_files/whole_file_42385')
+
+Next we make a list of the eid values of the prediabetic patients at the start of the study.
+dfToList_patients_pregnant_after_assessment_center_date = patients_pregnant_after_assessment_center_date['eid'].tolist()
+
+We then keep only the patients from the first_step dataframe that match our eid numbers for the prediabetic patients.
+first_step_only_diabetes_after_assessment_center = first_step[first_step.eid.isin(dfToList_patients_pregnant_after_assessment_center_date)]
+
+Fianlly we merge all the files together to get one dataframe with all the features which only contains the patients which we are able to classify into developing diabetes or not. The merge command is shown below.
+all_features_pregnancy_after_assessment_center = first_step_only_diabetes_after_assessment_center.merge(second_step, on = 'eid').merge(third_step, on = 'eid').merge(fourth_step, on = 'eid')
+
+If we run all_features_pregnancy_after_assessment_center.shape we see that the shape is (29, 12711) which is the number of patients we found and the total number of features.
+
+Now we finally have the whole dataframe with all the features for the prediabetic patients. 
+The next step is to save the dataframe as a csv, as we have done before, in order to send it back to the desktop using WinSCP.
+all_features_pregnancy_after_assessment_center.to_csv(path_or_buf = '~nib4003/for_winscp/all_features_pregnancy_after_assessment_center')
 
 
-54. Finding All Patients Who Have Gestational Diabetes Before Attending the Assessment Center and Pregnant Women Not Developing Gestational Diabetes - Look at Notebook
-"
+54. Finding All Patients Who Have Gestational Diabetes Before Attending the Assessment Center and Pregnant Women Not Developing Gestational Diabetes And Comparing Cohorts
+- Look at Notebook "Model 61 - Finding Patients Who Have Gestational Diabetes Before Attending the Assessment Center AND Cohort Comparison With No Gestational Diabetes Pregnancies"
+
+In this notebook, we do NOT actually run any models. We find that only 25 patients have gestational diabetes after the assessment center date. The reason for this is because the
+study was designed such that older patients were used and therefore most women who had children did so before the start of the study. This result also led to only 28 additional
+patients found who were pregnant after their date of attending the assessment center. It is likely that there were more patients who had children after they attended the 
+assessment center, but the data was not included for these patients. Otherwise, we found that about half of pregnant patients after their assessment center date developed
+gestational diabetes which seems high.
+
+
+55. Comparing Cohorts of Model 61 Using Median Values - Look at Notebook 
+"Model 61 - Demographic and Other Information for Different Cohorts USING MEDIAN showing distributions for features in cohorts are extremely similar"
+
+In this notebook, we ran through the same statistical analysis as usual for Model 61 but using the median values instead of the mean for all measurements. We find that only a
+select few measurements are found to be statistically significant when using the measurement of the center: blood glucose, income score for English participants, and 
+townsend deprivation score.
+
+
+56. 
+
+
