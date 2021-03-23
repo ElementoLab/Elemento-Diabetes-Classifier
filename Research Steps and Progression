@@ -1003,8 +1003,8 @@ cox regression model and other statistics.
 45. Creation of CORRECT Models With Cornell EHR Features Using Patient Cohorts From Model 31 and Equal Sized Cohorts Of These Patients - Look at Notebook
 "Model 34 and Model 34.1 - Model For Features From Literature AND Cornell EHR Specific ALSO WITH EQUAL COHORT SIZES (also shows effect of coding rural and urban feature at bottom)"
 
-In this notebook, we create models using only the Cornell EHR features from literature from Model 24. Our performance is around a 0.75 ROC AUC and the linear models perform
-just as well as the other models for most metrics. This is a good sign for interpretability. 
+In this notebook, we create models using only the Cornell EHR features from literature from the 35 features from Model 24. 
+Our performance is around a 0.75 ROC AUC and the linear models perform just as well as the other models for most metrics. This is a good sign for interpretability. 
 
 We also encode the Home area population density - urban or rural feature which we have not done before, and the results are very similar to those of the other dataframe, with 
 no reason to suspect either way influences the model. However, what does change is that since we are spreading out the values from the feature into multiple different columns,
@@ -1024,12 +1024,28 @@ we end with a model with 32 features. The results are that there is a small sign
 Therefore, we conclude that these features do have a small influence on the model, but are not the most important features. 
 
 
-48. Showing KNN and KMeans Cannot Cluster Patients For Prediction of Progression to Diabetes or Not - Look at Notebook 
-"Model 31 - Showing KNN and KMeans does not work for using ICD codes only patients not progressing and progressing to diabetes"
+48. Showing KNN and KMeans Can Cluster Patients For Prediction of Progression to Diabetes or Not - Look at Notebook 
+"Model 31 - Showing KNN and KMeans does work for using ICD codes only patients not progressing and progressing to diabetes"
 
-Here we use 246 patients we know don't progress to diabetes using ICD codes for prediabetes and 246 patients we know do progress to diabetes using ICD codes for diabetes
-and test on the 742 patients from Model 1 who do not progress to diabetes. We find that when using both algorithms, the accuracy of predication of the 742 patients is very 
-low and therefore these methods do not work.
+In this notebook, we do a lot of different things and find new results. We being using 246 patients we know don't progress to diabetes using ICD codes for prediabetes 
+and 246 patients we know do progress to diabetes using ICD codes for diabetes, and test on the 742 patients from Model 1 who do not progress to diabetes. 
+We find that when using both algorithms, the accuracy of predication of the 742 patients is very low and therefore these methods do not work.
+
+Next, we import the dataframe of 9944 patients with the 35 features from the Cornell EHR, Model 34. The reason for this is because we think that it is possible that with less
+features we will be able to find more pronounced groupings using KMeans. Therefore, we create a knee plot using this data and the algorithm split the patients by sex. We then
+run cohort comparisons between sex and find that the median value of the HbA1c is the only non-significant biological measure between the groups. This means that HbA1c is a 
+very robust predictor of diabetes because it does not change due to gender. Also, we further split gender into males progressing to diabetes vs. males not progressing to 
+diabetes and females progressing to diabetes vs. females not progressing to diabetes, and run cohort comparisons on the within gender groupings. We find that the measurements
+within genders have all medical tests found to be significant which we expect since we have seen this from other cohorts. 
+
+We then take the gender variable out of our data and run KMeans again. The knee plot tells us to use 2 groups again, which were split into white patients vs. non-white patients.
+We again ran a cohort comparison between these two groups and found that there are some measures that are not significant between groups using the mean or median, such as the 
+BMI. We also find that the polygenic risk score is extremely different between the groups for both mean and median. Therefore, we find that polygenic risk score between 
+ethnicities is shown to be very different, which is what we expected, verifying that the values calculated have some validity.
+
+Next, we remove ethnicity from the features of the dataframe and run KMeans again. We again receive a knee plot that tells us to split at 2 groups. We are currently trying to 
+find the features explaining the split from the algorithm. We use the sklearn pairplot function to look at the distributions of the remaining features, but don't see any
+feature that stands out to us.
 
 
 49. Showing Median Values For Patient Cohorts - Look at Notebook 
@@ -1194,6 +1210,32 @@ select few measurements are found to be statistically significant when using the
 townsend deprivation score.
 
 
-56. 
+56. Attempt to create a new metric using the distributions of patients progressing to diabetes vs. patients not progressing to diabetes for top 10 features of model 34 
+- Look at Notebook"Model 31 - Attempting to Create a NEW Metric Using Distributions of Top 10 Features From Model 34 AND Using Linear SVM to Create Tiers for Risk Score"
+and Word Document "Elemento Diabetes Metric Creation Ideas"
 
+In these two documents, we first attempt to create a metric which takes an input value from a new patient for the most important features we found from Model 34, and outputs
+a probability to progression for diabetic patients. We create a function which attempts to do this and has a few bugs still, but we end up disbanding this idea after talking
+with Olivier on 3/22. We find that the Linear SVM, the algorithm we will end up using due to its large AUC ROC (0.76) and sensitivity (True Positive Rate, correctly diagnosing 
+patients who actually progress to diabetes) (0.747), from Model 34 has a built in sklearn function called decision_function which outputs a score. If this score is positive, 
+the patient is labeled as progressing to diabetes, if negative, the patient is labeled as not progressing to diabetes. Olivier told me that we do not want to use probabilities
+in the clinical setting because patients do not understand probabilities well. Therefore, we will create a tier system such that the scores given by the Linear SVM result in 
+an output of very high risk, high risk, moderate risk, and low risk for progression to diabetes. The details for the classification of patients into these groups are shown in 
+the jupyter notebook mentioned above.
+
+
+57. Showing distributions using pairplot for features of Model 34, specifically looking into top 10 features and finding patients living in Scotland have small proportion of 
+patients progress to diabetes, and comparing cohorts of Scotland-involved patients to find if diabetes progression is largely impacted by genetics for Scottish patients or not
+which we find that it is more likely that societal factors have an influence on disease progression rather than genetics - Look at notebook
+"Model 34 - Looking at Distributions of Top 10 Parameters and Pairplot of All Features - Also Find and Explore Scottish Patients Having Low Risk of Progression to Diabetes"
+
+In this notebook, we inspect the features of Model 34, specifically the top 10. We find that patients living in Scotland have a very low progression rate to diabetes. We 
+further inspect this and create different cohorts. The first cohorts we compare are all patients living in Scotland vs. all patients not living in Scotland. The second 
+cohorts we compare are all patients born in Scotland and still living in Scotland vs. all patients born in Scotland who no longer live in Scotland. We find that the proportion
+of patients born in and continuing to live in Scotland progress to diabetes at a much lower rate than those born in Scotland and move out of Scotland. This tells us that it is 
+not solely a genetic factor that influences diabetes progression for Scottish-born patients, and furthermore that society plays a large role in development of diabetes.
+
+
+58. Attempting to Make Distributions of Features Normally Distributed And Seeing If This Changes the Model Results - 
+Look at Notebook "Model 34 - Attempting to make important feature distributions normally distributed"
 
